@@ -9,6 +9,7 @@ import ReferAndWin from './pages/ReferAndWin';
 import Feedback from './pages/Feedback';
 import ContactUs from './pages/ContactUs';
 import AboutUs from './pages/AboutUs';
+import Job from './pages/Job/Job';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/job/:id" element={<Job />} />
           </Routes>
         </main>
         <Footer />
