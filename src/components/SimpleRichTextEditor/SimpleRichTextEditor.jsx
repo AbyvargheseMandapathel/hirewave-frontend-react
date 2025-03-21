@@ -155,42 +155,29 @@ const SimpleRichTextEditor = ({ value, onChange, placeholder }) => {
 
   // Tables
   const handleTable = () => {
-    setInputPopup({
-      isOpen: true,
-      title: 'Enter number of rows:',
-      type: 'number',
-      placeholder: '3',
-      initialValue: '3',
-      onSubmit: (rows) => {
-        setInputPopup({
-          isOpen: true,
-          title: 'Enter number of columns:',
-          type: 'number',
-          placeholder: '3',
-          initialValue: '3',
-          onSubmit: (cols) => {
-            const numRows = parseInt(rows, 10);
-            const numCols = parseInt(cols, 10);
-            
-            if (!isNaN(numRows) && !isNaN(numCols) && numRows > 0 && numCols > 0) {
-              let tableHTML = '<table class="editor-table"><tbody>';
-              
-              for (let i = 0; i < numRows; i++) {
-                tableHTML += '<tr>';
-                for (let j = 0; j < numCols; j++) {
-                  tableHTML += '<td>Cell</td>';
-                }
-                tableHTML += '</tr>';
-              }
-              
-              tableHTML += '</tbody></table>';
-              
-              execCommand('insertHTML', false, tableHTML);
-            }
+    const rows = window.prompt('Enter number of rows:', '3');
+    const numRows = parseInt(rows, 10);
+  
+    if (!isNaN(numRows) && numRows > 0) {
+      const cols = window.prompt('Enter number of columns:', '3');
+      const numCols = parseInt(cols, 10);
+  
+      if (!isNaN(numCols) && numCols > 0) {
+        let tableHTML = '<table class="editor-table"><tbody>';
+  
+        for (let i = 0; i < numRows; i++) {
+          tableHTML += '<tr>';
+          for (let j = 0; j < numCols; j++) {
+            tableHTML += '<td>Cell</td>';
           }
-        });
+          tableHTML += '</tr>';
+        }
+  
+        tableHTML += '</tbody></table>';
+  
+        execCommand('insertHTML', false, tableHTML);
       }
-    });
+    }
   };
 
   return (
