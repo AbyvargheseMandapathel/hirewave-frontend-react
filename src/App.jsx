@@ -10,6 +10,7 @@ import Feedback from './pages/Feedback';
 import ContactUs from './pages/ContactUs';
 import AboutUs from './pages/AboutUs';
 import Job from './pages/Job/Job';
+import AddJobUpdate from './pages/AddJobUpdate';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/about-us" element={<AboutUs />} />
             <Route path="/job/:id" element={<Job />} />
+            <Route path="/add-job" element={<AddJobUpdate />} />
           </Routes>
         </main>
         <Footer />
