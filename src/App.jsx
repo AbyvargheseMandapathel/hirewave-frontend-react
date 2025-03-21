@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -11,28 +11,75 @@ import ContactUs from './pages/ContactUs';
 import AboutUs from './pages/AboutUs';
 import Job from './pages/Job/Job';
 import AddJobUpdate from './pages/AddJobUpdate';
+import AdminDashboard from './pages/Dashboard/AdminDashboard';
+
+// Layout component to conditionally render Navbar and Footer
+const Layout = ({ children }) => {
+  const location = useLocation();
+  const isDashboardRoute = location.pathname.includes('/admin-dashboard');
+  
+  return (
+    <div className="dark bg-[#1e293b] min-h-screen flex flex-col text-[#94a3b8]">
+      {!isDashboardRoute && <Navbar />}
+      <main className="flex-grow">
+        {children}
+      </main>
+      {!isDashboardRoute && <Footer />}
+    </div>
+  );
+};
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="dark bg-[#1e293b] min-h-screen flex flex-col text-[#94a3b8]">
-        <Navbar />
-        <main className="flex-grow">
-          <Routes>
-            {/* Your routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/refer-and-win" element={<ReferAndWin />} />
-            <Route path="/feedback" element={<Feedback />} />
-            <Route path="/contact-us" element={<ContactUs />} />
-            <Route path="/about-us" element={<AboutUs />} />
-            <Route path="/job/:id" element={<Job />} />
-            <Route path="/add-job" element={<AddJobUpdate />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <Routes>
+        <Route path="/" element={
+          <Layout>
+            <Home />
+          </Layout>
+        } />
+        <Route path="/login" element={
+          <Layout>
+            <Login />
+          </Layout>
+        } />
+        <Route path="/signup" element={
+          <Layout>
+            <Signup />
+          </Layout>
+        } />
+        <Route path="/refer-and-win" element={
+          <Layout>
+            <ReferAndWin />
+          </Layout>
+        } />
+        <Route path="/feedback" element={
+          <Layout>
+            <Feedback />
+          </Layout>
+        } />
+        <Route path="/contact-us" element={
+          <Layout>
+            <ContactUs />
+          </Layout>
+        } />
+        <Route path="/about-us" element={
+          <Layout>
+            <AboutUs />
+          </Layout>
+        } />
+        <Route path="/job/:id" element={
+          <Layout>
+            <Job />
+          </Layout>
+        } />
+        <Route path="/add-job" element={
+          <Layout>
+            <AddJobUpdate />
+          </Layout>
+        } />
+        <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
+      </Routes>
     </BrowserRouter>
   );
 }
