@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimesCircle } from 'react-icons/fa';
-import './Popup.css'; // Fixed - importing from the current directory
+import './Popup.css'; 
 
 const InputPopup = ({ 
   isOpen, 
