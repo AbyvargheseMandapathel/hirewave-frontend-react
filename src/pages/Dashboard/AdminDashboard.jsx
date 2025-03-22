@@ -50,9 +50,13 @@ const AdminDashboard = () => {
         date.setDate(date.getDate() - (days - i - 1));
         data.push({
           date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          visitors: Math.floor(Math.random() * 400) + 100,
+          visitors: Math.floor(Math.random() * 4000) + 100,
         });
       }
+      
+      // Debug statement to track chart data generation
+      console.log(`Generated ${data.length} days of chart data for ${timeRange}:`, data);
+      
       setChartData(data);
       setChartOffset(0); // Reset chart offset when time range changes
     };
@@ -83,16 +87,6 @@ const AdminDashboard = () => {
 
   const handleMouseLeave = () => {
     setIsDragging(false);
-  };
-
-  // Calculate visible bars based on time range
-  const getVisibleBars = () => {
-    if (timeRange === '7days') {
-      return chartData;
-    } else {
-      const visibleCount = 7; // Show 7 bars at a time
-      return chartData.slice(chartOffset, chartOffset + visibleCount);
-    }
   };
 
   // Navigation functions for chart
@@ -378,25 +372,60 @@ const AdminDashboard = () => {
                   onMouseMove={handleMouseMove}
                   onMouseLeave={handleMouseLeave}
                 >
-                  <div className="flex items-end h-40 space-x-2 min-w-full">
-                    {(timeRange === '7days' ? chartData : chartData.slice(chartOffset, chartOffset + 7)).map((item, index) => {
-                      // Ensure we're calculating height properly - max value is 500
-                      const maxValue = Math.max(...chartData.map(d => d.visitors), 500);
-                      const height = (item.visitors / maxValue) * 100;
+                  {/* SVG Chart */}
+                  <div className="h-60 w-full relative">
+                    <svg className="w-full h-full" viewBox={`0 0 ${(timeRange === '7days' ? chartData.length : 7) * 60} 200`} preserveAspectRatio="none">
+                      {/* Grid lines */}
+                      <line x1="0" y1="150" x2="100%" y2="150" stroke="#334155" strokeWidth="1" />
+                      <line x1="0" y1="100" x2="100%" y2="100" stroke="#334155" strokeWidth="1" strokeDasharray="4" />
+                      <line x1="0" y1="50" x2="100%" y2="50" stroke="#334155" strokeWidth="1" strokeDasharray="4" />
                       
-                      return (
-                        <div key={index} className="flex-1 flex flex-col items-center min-w-[40px]">
-                          <div className="text-xs text-[#94a3b8] mb-1">{item.visitors}</div>
-                          <div 
-                            className="w-full bg-[#818cf8] rounded-t-sm transition-all duration-300 ease-in-out hover:bg-[#a5b4fc]"
-                            style={{ height: `${height}%` }}
-                          ></div>
-                          <div className="text-xs text-[#94a3b8] mt-2 truncate w-full text-center">
-                            {item.date}
-                          </div>
-                        </div>
-                      );
-                    })}
+                      {/* Chart bars */}
+                      {(timeRange === '7days' ? chartData : chartData.slice(chartOffset, chartOffset + 7)).map((item, index) => {
+                        const maxValue = Math.max(...chartData.map(d => d.visitors), 500);
+                        const barHeight = (item.visitors / maxValue) * 150;
+                        const barWidth = 40;
+                        const barX = index * 60 + 10; // 60px per bar with spacing
+                        const barY = 150 - barHeight;
+                        
+                        return (
+                          <g key={index}>
+                            {/* Bar */}
+                            <rect 
+                              x={barX} 
+                              y={barY} 
+                              width={barWidth} 
+                              height={barHeight} 
+                              fill="#818cf8" 
+                              rx="2"
+                              className="transition-all duration-300 hover:fill-[#a5b4fc]"
+                            />
+                            
+                            {/* Value text */}
+                            <text 
+                              x={barX + barWidth/2} 
+                              y={barY - 5} 
+                              textAnchor="middle" 
+                              fontSize="10" 
+                              fill="#94a3b8"
+                            >
+                              {item.visitors}
+                            </text>
+                            
+                            {/* Date text */}
+                            <text 
+                              x={barX + barWidth/2} 
+                              y="170" 
+                              textAnchor="middle" 
+                              fontSize="10" 
+                              fill="#94a3b8"
+                            >
+                              {item.date}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
                   </div>
                 </div>
               </div>
