@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FaHome, FaBriefcase, FaUsers, FaChartBar, FaCog, 
+import {
+  FaHome, FaBriefcase, FaUsers, FaChartBar, FaCog,
   FaBell, FaSearch, FaPlus, FaEllipsisV, FaUserCircle,
-  FaBars, FaTimes, FaArrowLeft, FaArrowRight
+  FaBars, FaTimes, FaArrowLeft, FaArrowRight, FaMoneyBillWave
 } from 'react-icons/fa';
 
 // Custom scrollbar styles
@@ -36,7 +36,7 @@ const AdminDashboard = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  
+
   // Generate chart data based on selected time range
   useEffect(() => {
     const generateChartData = () => {
@@ -53,21 +53,21 @@ const AdminDashboard = () => {
           visitors: Math.floor(Math.random() * 4000) + 100,
         });
       }
-      
+
       // Debug statement to track chart data generation
       console.log(`Generated ${data.length} days of chart data for ${timeRange}:`, data);
-      
+
       setChartData(data);
       setChartOffset(0); // Reset chart offset when time range changes
     };
-    
+
     generateChartData();
   }, [timeRange]);
 
   // Mouse event handlers for dragging
   const handleMouseDown = (e) => {
     if (timeRange === '7days') return; // No dragging for 7 days view
-    
+
     setIsDragging(true);
     setStartX(e.pageX - chartContainerRef.current.offsetLeft);
     setScrollLeft(chartContainerRef.current.scrollLeft);
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
-    
+
     const x = e.pageX - chartContainerRef.current.offsetLeft;
     const walk = (x - startX) * 2; // Scroll speed multiplier
     chartContainerRef.current.scrollLeft = scrollLeft - walk;
@@ -124,12 +124,12 @@ const AdminDashboard = () => {
       <style>{scrollbarStyles}</style>
       {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
-      
+
       {/* Sidebar - with mobile support */}
       <div className={`w-64 bg-[#1e293b] border-r border-[#334155] fixed inset-y-0 left-0 z-30 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out md:relative md:block`}>
         <div className="p-4 border-b border-[#334155] flex justify-between items-center">
@@ -139,56 +139,63 @@ const AdminDashboard = () => {
             </h2>
             <p className="text-[#94a3b8] text-sm">Admin Dashboard</p>
           </div>
-          <button 
+          <button
             className="text-[#94a3b8] hover:text-white md:hidden"
             onClick={() => setIsSidebarOpen(false)}
           >
             <FaTimes />
           </button>
         </div>
-        
+
         <nav className="mt-6">
           <div className="px-4 mb-3">
             <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
               Main
             </p>
           </div>
-          <Link 
-            to="/dashboard" 
+          <Link
+            to="/dashboard"
             className="flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white"
           >
             <FaHome className="mr-3" />
             Overview
           </Link>
-          <Link 
-            to="/dashboard/jobs" 
+          <Link
+            to="/dashboard/jobs"
             className="flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white"
           >
             <FaBriefcase className="mr-3" />
             Jobs
           </Link>
-          <Link 
-            to="/dashboard/applicants" 
+          <Link
+            to="/dashboard/applicants"
             className="flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white"
           >
             <FaUsers className="mr-3" />
             Applicants
           </Link>
-          <Link 
-            to="/dashboard/analytics" 
+          <Link
+            to="/dashboard/analytics"
             className="flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white"
           >
             <FaChartBar className="mr-3" />
             Analytics
           </Link>
-          
+          <Link
+            to="/dashboard/financial"
+            className="flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white"
+          >
+            <FaMoneyBillWave className="mr-3" />
+            Financial
+          </Link>
+
           <div className="px-4 mt-6 mb-3">
             <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
               Settings
             </p>
           </div>
-          <Link 
-            to="/dashboard/settings" 
+          <Link
+            to="/dashboard/settings"
             className="flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white"
           >
             <FaCog className="mr-3" />
@@ -196,14 +203,14 @@ const AdminDashboard = () => {
           </Link>
         </nav>
       </div>
-      
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navigation - with mobile support */}
         <header className="bg-[#1e293b] border-b border-[#334155]">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center">
-              <button 
+              <button
                 className="text-[#94a3b8] mr-4 md:hidden hover:text-white"
                 onClick={() => setIsSidebarOpen(true)}
               >
@@ -213,18 +220,18 @@ const AdminDashboard = () => {
                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
                   <FaSearch className="text-[#64748b]" />
                 </span>
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
+                <input
+                  type="text"
+                  placeholder="Search..."
                   className="bg-[#0f172a] text-white pl-10 pr-4 py-2 rounded-lg border border-[#334155] focus:outline-none focus:ring-2 focus:ring-[#818cf8] focus:border-transparent"
                 />
               </div>
             </div>
-            
+
             <div className="flex items-center">
               {/* Notifications dropdown */}
               <div className="relative">
-                <button 
+                <button
                   className="p-2 mr-2 text-[#94a3b8] hover:text-white relative"
                   onClick={() => {
                     setIsNotificationsOpen(!isNotificationsOpen);
@@ -234,7 +241,7 @@ const AdminDashboard = () => {
                   <FaBell />
                   <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                 </button>
-                
+
                 {isNotificationsOpen && (
                   <div className="absolute right-0 mt-2 w-72 bg-[#1e293b] rounded-lg shadow-lg border border-[#334155] z-10">
                     <div className="p-4 border-b border-[#334155]">
@@ -260,10 +267,10 @@ const AdminDashboard = () => {
                   </div>
                 )}
               </div>
-              
+
               {/* User dropdown */}
               <div className="relative ml-3">
-                <button 
+                <button
                   className="flex items-center text-[#94a3b8] hover:text-white"
                   onClick={() => {
                     setIsUserDropdownOpen(!isUserDropdownOpen);
@@ -273,7 +280,7 @@ const AdminDashboard = () => {
                   <FaUserCircle className="h-8 w-8" />
                   <span className="ml-2 hidden md:block">Admin User</span>
                 </button>
-                
+
                 {isUserDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-[#1e293b] rounded-lg shadow-lg border border-[#334155] z-10">
                     <div className="p-4 border-b border-[#334155]">
@@ -297,14 +304,14 @@ const AdminDashboard = () => {
             </div>
           </div>
         </header>
-        
+
         {/* Dashboard Content */}
         <main className="flex-1 overflow-y-auto bg-[#0f172a] p-6">
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-white mb-2">Dashboard Overview</h1>
             <p className="text-[#94a3b8]">Welcome back, here's what's happening with your platform today.</p>
           </div>
-          
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {stats.map((stat, index) => (
@@ -322,14 +329,14 @@ const AdminDashboard = () => {
               </div>
             ))}
           </div>
-          
+
           {/* Visitor Analytics Dashboard */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Visitor Table */}
             <div className="bg-[#1e293b] rounded-xl shadow-lg border border-[#334155] p-6 lg:col-span-2">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-medium text-white">Visitor Analytics</h3>
-                <select 
+                <select
                   className="bg-[#0f172a] text-[#94a3b8] border border-[#334155] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#818cf8]"
                   value={timeRange}
                   onChange={(e) => setTimeRange(e.target.value)}
@@ -339,13 +346,13 @@ const AdminDashboard = () => {
                   <option value="alltime">All Time Stats</option>
                 </select>
               </div>
-              
+
               {/* Visual chart representation */}
               <div className="mb-6 bg-[#0f172a] p-4 rounded-lg border border-[#334155]">
                 {timeRange !== '7days' && (
                   <div className="flex justify-between mb-2">
-                    <button 
-                      onClick={handlePrevious} 
+                    <button
+                      onClick={handlePrevious}
                       disabled={chartOffset === 0}
                       className={`p-1 rounded ${chartOffset === 0 ? 'text-gray-600' : 'text-[#818cf8] hover:bg-[#334155]'}`}
                     >
@@ -354,8 +361,8 @@ const AdminDashboard = () => {
                     <div className="text-[#94a3b8] text-sm">
                       Showing {chartOffset + 1}-{Math.min(chartOffset + 7, chartData.length)} of {chartData.length} days
                     </div>
-                    <button 
-                      onClick={handleNext} 
+                    <button
+                      onClick={handleNext}
                       disabled={chartOffset >= chartData.length - 7}
                       className={`p-1 rounded ${chartOffset >= chartData.length - 7 ? 'text-gray-600' : 'text-[#818cf8] hover:bg-[#334155]'}`}
                     >
@@ -363,8 +370,8 @@ const AdminDashboard = () => {
                     </button>
                   </div>
                 )}
-                
-                <div 
+
+                <div
                   ref={chartContainerRef}
                   className={`overflow-x-auto ${timeRange !== '7days' ? 'cursor-grab' : ''} ${isDragging ? 'cursor-grabbing' : ''}`}
                   onMouseDown={handleMouseDown}
@@ -379,7 +386,7 @@ const AdminDashboard = () => {
                       <line x1="0" y1="150" x2="100%" y2="150" stroke="#334155" strokeWidth="1" />
                       <line x1="0" y1="100" x2="100%" y2="100" stroke="#334155" strokeWidth="1" strokeDasharray="4" />
                       <line x1="0" y1="50" x2="100%" y2="50" stroke="#334155" strokeWidth="1" strokeDasharray="4" />
-                      
+
                       {/* Chart bars */}
                       {(timeRange === '7days' ? chartData : chartData.slice(chartOffset, chartOffset + 7)).map((item, index) => {
                         const maxValue = Math.max(...chartData.map(d => d.visitors), 500);
@@ -387,37 +394,37 @@ const AdminDashboard = () => {
                         const barWidth = 40;
                         const barX = index * 60 + 10; // 60px per bar with spacing
                         const barY = 150 - barHeight;
-                        
+
                         return (
                           <g key={index}>
                             {/* Bar */}
-                            <rect 
-                              x={barX} 
-                              y={barY} 
-                              width={barWidth} 
-                              height={barHeight} 
-                              fill="#818cf8" 
+                            <rect
+                              x={barX}
+                              y={barY}
+                              width={barWidth}
+                              height={barHeight}
+                              fill="#818cf8"
                               rx="2"
                               className="transition-all duration-300 hover:fill-[#a5b4fc]"
                             />
-                            
+
                             {/* Value text */}
-                            <text 
-                              x={barX + barWidth/2} 
-                              y={barY - 5} 
-                              textAnchor="middle" 
-                              fontSize="10" 
+                            <text
+                              x={barX + barWidth / 2}
+                              y={barY - 5}
+                              textAnchor="middle"
+                              fontSize="10"
                               fill="#94a3b8"
                             >
                               {item.visitors}
                             </text>
-                            
+
                             {/* Date text */}
-                            <text 
-                              x={barX + barWidth/2} 
-                              y="170" 
-                              textAnchor="middle" 
-                              fontSize="10" 
+                            <text
+                              x={barX + barWidth / 2}
+                              y="170"
+                              textAnchor="middle"
+                              fontSize="10"
                               fill="#94a3b8"
                             >
                               {item.date}
@@ -429,7 +436,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Scrollable Table to display visitor data */}
               <div className="overflow-y-auto max-h-64">
                 <table className="w-full text-[#94a3b8]">
@@ -450,11 +457,11 @@ const AdminDashboard = () => {
                 </table>
               </div>
             </div>
-            
+
             {/* Visitor Log */}
             <div className="bg-[#1e293b] rounded-xl shadow-lg border border-[#334155] p-6 flex flex-col h-full">
               <h3 className="text-lg font-medium text-white mb-6">Recent Activity Log</h3>
-              
+
               <div className="overflow-y-auto flex-grow pr-2">
                 <div className="space-y-4">
                   {visitorLogs.map(log => (
@@ -470,7 +477,7 @@ const AdminDashboard = () => {
                   ))}
                 </div>
               </div>
-              
+
               {/* View more button at the bottom */}
               <div className="mt-4 pt-4 border-t border-[#334155]">
                 <button className="w-full py-2 px-4 bg-[#334155] hover:bg-[#475569] text-white rounded-lg transition-colors duration-200 flex items-center justify-center">
@@ -482,6 +489,8 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
+
+          
         </main>
       </div>
     </div>

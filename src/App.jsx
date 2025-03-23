@@ -12,6 +12,8 @@ import AboutUs from './pages/AboutUs';
 import Job from './pages/Job/Job';
 import AddJobUpdate from './pages/AddJobUpdate';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
+import FinancialDashboard from './pages/Dashboard/FinancialDashboard';
+
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
@@ -78,7 +80,8 @@ function App() {
             <AddJobUpdate />
           </Layout>
         } />
-        <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
+        <Route path="/dashboard/admin" element={<AdminDashboard />} />
+        <Route path="/dashboard/financial" element={<FinancialDashboard />} />
       </Routes>
     </BrowserRouter>
   );
