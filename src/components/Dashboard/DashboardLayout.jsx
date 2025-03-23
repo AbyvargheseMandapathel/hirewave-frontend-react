@@ -74,7 +74,7 @@ const DashboardLayout = ({ children }) => {
             Overview
           </Link>
           <Link 
-            to="/dashboard/jobs" 
+            to="/dashboard/admin/jobs" 
             className={`flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white ${location.pathname === '/dashboard/jobs' ? 'bg-[#334155] text-white' : ''}`}
           >
             <FaBriefcase className="mr-3" />
@@ -88,14 +88,7 @@ const DashboardLayout = ({ children }) => {
             Users
           </Link>
           <Link 
-            to="/dashboard/analytics" 
-            className={`flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white ${location.pathname === '/dashboard/analytics' ? 'bg-[#334155] text-white' : ''}`}
-          >
-            <FaChartBar className="mr-3" />
-            Analytics
-          </Link>
-          <Link 
-            to="/dashboard/financial" 
+            to="/dashboard/admin/financial" 
             className={`flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white ${location.pathname === '/dashboard/financial' ? 'bg-[#334155] text-white' : ''}`}
           >
             <FaMoneyBillWave className="mr-3" />

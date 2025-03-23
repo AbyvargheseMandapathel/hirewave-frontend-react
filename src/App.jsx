@@ -13,6 +13,11 @@ import Job from './pages/Job/Job';
 import AddJobUpdate from './pages/AddJobUpdate';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import FinancialDashboard from './pages/Dashboard/FinancialDashboard';
+import JobsAdminDashboard from './pages/Dashboard/JobsAdminDashboard';
+import JobDetailPage from './components/Dashboard/JobDetailsCard';
+// Add this import at the top with other imports
+import UsersDashboard from './pages/Dashboard/UsersDashboard';
+import Settings from './pages/Settings/Settings';
 
 
 // Layout component to conditionally render Navbar and Footer
@@ -81,7 +86,11 @@ function App() {
           </Layout>
         } />
         <Route path="/dashboard/admin" element={<AdminDashboard />} />
-        <Route path="/dashboard/financial" element={<FinancialDashboard />} />
+        <Route path="/dashboard/admin/financial" element={<FinancialDashboard />} />
+        <Route path="/dashboard/admin/jobs" element={<JobsAdminDashboard />} />
+        <Route path="/dashboard/admin/jobs/:jobId" element={<JobDetailPage />} />
+        <Route path="/dashboard/users" element={<UsersDashboard />} />
+        <Route path="/dashboard/settings" element={<Settings />} />
       </Routes>
     </BrowserRouter>
   );
