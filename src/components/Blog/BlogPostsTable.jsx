@@ -14,7 +14,7 @@ import {
   FaExternalLinkAlt,
 } from "react-icons/fa";
 
-const BlogPostsTable = ({ posts, onDelete }) => {  // Added onDelete prop
+const BlogPostsTable = ({ posts, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("date");
   const [sortDirection, setSortDirection] = useState("desc");
@@ -42,7 +42,7 @@ const BlogPostsTable = ({ posts, onDelete }) => {  // Added onDelete prop
     );
   };
 
-  // Filter and sort posts
+  // Filter posts based on search term
   const filteredPosts = posts.filter(
     (post) =>
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -50,8 +50,8 @@ const BlogPostsTable = ({ posts, onDelete }) => {  // Added onDelete prop
       post.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Sort posts
   const sortedPosts = [...filteredPosts].sort((a, b) => {
-    let comparison = 0;
     const fields = {
       title: () => a.title.localeCompare(b.title),
       author: () => a.author.localeCompare(b.author),
@@ -59,9 +59,11 @@ const BlogPostsTable = ({ posts, onDelete }) => {  // Added onDelete prop
       status: () => a.status.localeCompare(b.status),
       date: () => new Date(a.date) - new Date(b.date),
       views: () => a.views - b.views,
-      comments: () => a.comments - b.comments
+      comments: () => a.comments - b.comments,
     };
-    return fields[sortField] ? fields[sortField]() : 0;
+
+    const result = fields[sortField] ? fields[sortField]() : 0;
+    return sortDirection === "asc" ? result : -result;
   });
 
   // Pagination
@@ -79,7 +81,7 @@ const BlogPostsTable = ({ posts, onDelete }) => {  // Added onDelete prop
       Draft: "bg-yellow-900 text-yellow-300",
       Scheduled: "bg-blue-900 text-blue-300",
     };
-    
+
     return (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -128,7 +130,6 @@ const BlogPostsTable = ({ posts, onDelete }) => {  // Added onDelete prop
 
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-[#334155]">
-            {/* Table Header */}
             <thead className="bg-[#0f172a]">
               <tr>
                 {["title", "author", "category", "status", "date", "views", "comments"].map((field) => (
@@ -150,7 +151,6 @@ const BlogPostsTable = ({ posts, onDelete }) => {  // Added onDelete prop
               </tr>
             </thead>
 
-            {/* Table Body */}
             <tbody className="bg-[#1e293b] divide-y divide-[#334155]">
               {currentPosts.map((post) => (
                 <tr key={post.id} className="hover:bg-[#0f172a]">

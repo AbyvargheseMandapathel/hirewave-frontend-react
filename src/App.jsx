@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -15,7 +15,6 @@ import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import FinancialDashboard from './pages/Dashboard/FinancialDashboard';
 import JobsAdminDashboard from './pages/Dashboard/JobsAdminDashboard';
 import JobDetailPage from './components/Dashboard/JobDetailsCard';
-// Add this import at the top with other imports
 import UsersDashboard from './pages/Dashboard/UsersDashboard';
 import Settings from './pages/Settings/Settings';
 import RecruiterSignup from './pages/RecruiterSignup';
@@ -23,6 +22,10 @@ import BlogAdminDashboard from './pages/Dashboard/BlogAdminDashboard';
 import BlogPostCreate from './pages/Dashboard/BlogPostCreate';
 import BlogPostEdit from './pages/Dashboard/BlogPostEdit';
 import BlogPostView from './pages/Dashboard/BlogPostView';
+import BlogDashboard from './pages/Dashboard/BlogDashboard';
+import JobseekerBlog from './pages/Jobseeker/JobseekerBlog';
+import RecruiterDashboard from './pages/Dashboard/RecruiterDashboard';
+import DynamicJobForm from './pages/Dashboard/DynamicJobForm';
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
@@ -42,7 +45,7 @@ const Layout = ({ children }) => {
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/" element={
           <Layout>
@@ -96,6 +99,7 @@ function App() {
         <Route path="/dashboard/users" element={<UsersDashboard />} />
         <Route path="/dashboard/settings" element={<Settings />} />
         <Route path="/dashboard/admin/blog" element={<BlogAdminDashboard />} />
+        {/* <Route path="/dashboard/blog" element={<BlogDashboard />} /> */}
         <Route path="/dashboard/blog/create" element={<BlogPostCreate />} />
         <Route path="/dashboard/blog/edit/:postId" element={<BlogPostEdit />} />
         <Route path="/dashboard/blog/view/:postId" element={<BlogPostView />} />
@@ -104,8 +108,18 @@ function App() {
             <RecruiterSignup />
           </Layout>
         } />
+        
+        {/* Add these new routes for jobseeker blog */}
+        <Route path="/jobseeker/blog" element={<JobseekerBlog />} />
+        <Route path="/jobseeker/blog/:postId" element={<BlogPostView />} />
+        
+        {/* Add JobMetricsOverview route */}
+        <Route path="/dashboard/recruiter" element={<RecruiterDashboard />} />
+        
+        {/* Dynamic Job Form route */}
+        <Route path="/dashboard/recruiter/create-job-form" element={<DynamicJobForm />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 
