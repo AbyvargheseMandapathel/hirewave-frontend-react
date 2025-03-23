@@ -6,6 +6,9 @@ import Button from '../components/common/Button';
 import SocialLoginButtons from '../components/common/SocialLoginButtons';
 import OTPInput from '../components/common/OTPInput';
 
+// Add this import at the top
+import { FaUserTie } from 'react-icons/fa';
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [showOtpForm, setShowOtpForm] = useState(false);

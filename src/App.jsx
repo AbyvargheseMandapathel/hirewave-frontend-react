@@ -18,7 +18,10 @@ import JobDetailPage from './components/Dashboard/JobDetailsCard';
 // Add this import at the top with other imports
 import UsersDashboard from './pages/Dashboard/UsersDashboard';
 import Settings from './pages/Settings/Settings';
-
+import RecruiterSignup from './pages/RecruiterSignup';
+// Import the BlogAdminDashboard component
+import BlogAdminDashboard from './pages/Dashboard/BlogAdminDashboard';
+import BlogPostCreate from './pages/Dashboard/BlogPostCreate';
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
@@ -91,6 +94,13 @@ function App() {
         <Route path="/dashboard/admin/jobs/:jobId" element={<JobDetailPage />} />
         <Route path="/dashboard/users" element={<UsersDashboard />} />
         <Route path="/dashboard/settings" element={<Settings />} />
+        <Route path="/dashboard/admin/blog" element={<BlogAdminDashboard />} />
+        <Route path="/dashboard/blog/create" element={<BlogPostCreate />} />
+        <Route path="/recruiter-signup" element={
+          <Layout>
+            <RecruiterSignup />
+          </Layout>
+        } />
       </Routes>
     </BrowserRouter>
   );

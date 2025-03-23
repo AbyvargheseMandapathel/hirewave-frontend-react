@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/Dashboard/DashboardLayout';
 import DashboardStats from '../../components/Dashboard/DashboardStats';
 import VisitorAnalytics from '../../components/Dashboard/VisitorAnalytics';
 import RecentActivityLog from '../../components/Dashboard/RecentActivityLog';
 import TopCandidates from '../../components/Dashboard/TopCandidates';
+import { FaUsers, FaBriefcase, FaRss, FaChartLine, FaMoneyBillWave } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [visitorData, setVisitorData] = useState([]);
+  
   
   // Generate visitor data
   useEffect(() => {
@@ -84,24 +87,25 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout>
       <div className="p-6">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">Dashboard Overview</h1>
-          <p className="text-[#94a3b8]">Welcome back! Here's what's happening on your platform.</p>
+        <h1 className="text-2xl font-bold text-white mb-6">Admin Dashboard</h1>
+        
+        {/* Stats Cards */}
+        <div className="mb-6">
+          <DashboardStats stats={statsData} />
         </div>
         
-        {/* Dashboard Stats */}
-        <DashboardStats stats={statsData} />
-        
-        {/* Visitor Analytics and Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Visitor Analytics */}
           <div className="lg:col-span-2">
             <VisitorAnalytics data={visitorData} />
           </div>
+          
+          {/* Right Column - Activity Log */}
           <div>
             <RecentActivityLog activities={recentActivities} />
           </div>
         </div>
-        
       </div>
     </DashboardLayout>
   );

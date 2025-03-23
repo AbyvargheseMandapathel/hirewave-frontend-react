@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   FaHome, FaBriefcase, FaUsers, FaChartBar, FaCog, 
   FaBell, FaSearch, FaUserCircle, FaBars, FaTimes, 
-  FaMoneyBillWave, FaSignOutAlt
+  FaMoneyBillWave, FaSignOutAlt, FaRss
 } from 'react-icons/fa';
 
 // Custom scrollbar styles
@@ -86,6 +86,14 @@ const DashboardLayout = ({ children }) => {
           >
             <FaUsers className="mr-3" />
             Users
+          </Link>
+          {/* Updated Blog section with correct path */}
+          <Link 
+            to="/dashboard/admin/blog" 
+            className={`flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white ${location.pathname.includes('/dashboard/admin/blog') ? 'bg-[#334155] text-white' : ''}`}
+          >
+            <FaRss className="mr-3" />
+            Blog
           </Link>
           <Link 
             to="/dashboard/admin/financial" 

@@ -1,12 +1,26 @@
+// Update the Signup component to include a recruiter signup link
 import React from 'react';
 import SignupForm from '../components/Signup/SignupForm';
+import { Link } from 'react-router-dom';
+import { FaUserTie } from 'react-icons/fa';
 
 const Signup = () => {
   return (
     <div className="flex flex-col lg:flex-row min-h-[calc(100vh-200px)]">
       {/* Left Column - Signup Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-4">
-        <SignupForm />
+        <div className="w-full max-w-md">
+          <SignupForm />
+          
+          {/* Add recruiter signup link */}
+          <div className="mt-4 flex justify-center items-center bg-[#0f172a] p-3 rounded-lg border border-[#334155]">
+            <FaUserTie className="text-[#818cf8] mr-2" />
+            <span className="text-[#94a3b8]">Are you hiring? </span>
+            <Link to="/recruiter-signup" className="text-[#818cf8] hover:text-[#a5b4fc] font-medium ml-2">
+              Sign up as a recruiter
+            </Link>
+          </div>
+        </div>
       </div>
 
       {/* Right Column - Image (visible only on desktop) */}
