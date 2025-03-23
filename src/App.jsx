@@ -19,9 +19,10 @@ import JobDetailPage from './components/Dashboard/JobDetailsCard';
 import UsersDashboard from './pages/Dashboard/UsersDashboard';
 import Settings from './pages/Settings/Settings';
 import RecruiterSignup from './pages/RecruiterSignup';
-// Import the BlogAdminDashboard component
 import BlogAdminDashboard from './pages/Dashboard/BlogAdminDashboard';
 import BlogPostCreate from './pages/Dashboard/BlogPostCreate';
+import BlogPostEdit from './pages/Dashboard/BlogPostEdit';
+import BlogPostView from './pages/Dashboard/BlogPostView';
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
@@ -96,6 +97,8 @@ function App() {
         <Route path="/dashboard/settings" element={<Settings />} />
         <Route path="/dashboard/admin/blog" element={<BlogAdminDashboard />} />
         <Route path="/dashboard/blog/create" element={<BlogPostCreate />} />
+        <Route path="/dashboard/blog/edit/:postId" element={<BlogPostEdit />} />
+        <Route path="/dashboard/blog/view/:postId" element={<BlogPostView />} />
         <Route path="/recruiter-signup" element={
           <Layout>
             <RecruiterSignup />

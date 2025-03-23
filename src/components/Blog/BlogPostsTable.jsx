@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   FaEllipsisV,
   FaSearch,
@@ -14,13 +14,15 @@ import {
   FaExternalLinkAlt,
 } from "react-icons/fa";
 
-const BlogPostsTable = ({ posts }) => {
+const BlogPostsTable = ({ posts, onDelete }) => {  // Added onDelete prop
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("date");
   const [sortDirection, setSortDirection] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [postsPerPage] = useState(8); // Updated to display 8 posts per page
+  const [postsPerPage] = useState(8);
+  const navigate = useNavigate();
 
+  // Handle sorting
   const handleSort = (field) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -30,6 +32,7 @@ const BlogPostsTable = ({ posts }) => {
     }
   };
 
+  // Get sort icon
   const getSortIcon = (field) => {
     if (sortField !== field) return <FaSort className="ml-1 text-[#64748b]" />;
     return sortDirection === "asc" ? (
@@ -39,7 +42,7 @@ const BlogPostsTable = ({ posts }) => {
     );
   };
 
-  // Filter posts based on search term
+  // Filter and sort posts
   const filteredPosts = posts.filter(
     (post) =>
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -47,25 +50,18 @@ const BlogPostsTable = ({ posts }) => {
       post.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Sort posts
   const sortedPosts = [...filteredPosts].sort((a, b) => {
     let comparison = 0;
-    if (sortField === "title") {
-      comparison = a.title.localeCompare(b.title);
-    } else if (sortField === "author") {
-      comparison = a.author.localeCompare(b.author);
-    } else if (sortField === "category") {
-      comparison = a.category.localeCompare(b.category);
-    } else if (sortField === "status") {
-      comparison = a.status.localeCompare(b.status);
-    } else if (sortField === "date") {
-      comparison = new Date(a.date) - new Date(b.date);
-    } else if (sortField === "views") {
-      comparison = a.views - b.views;
-    } else if (sortField === "comments") {
-      comparison = a.comments - b.comments;
-    }
-    return sortDirection === "asc" ? comparison : -comparison;
+    const fields = {
+      title: () => a.title.localeCompare(b.title),
+      author: () => a.author.localeCompare(b.author),
+      category: () => a.category.localeCompare(b.category),
+      status: () => a.status.localeCompare(b.status),
+      date: () => new Date(a.date) - new Date(b.date),
+      views: () => a.views - b.views,
+      comments: () => a.comments - b.comments
+    };
+    return fields[sortField] ? fields[sortField]() : 0;
   });
 
   // Pagination
@@ -78,34 +74,37 @@ const BlogPostsTable = ({ posts }) => {
 
   // Status badge component
   const StatusBadge = ({ status }) => {
-    let bgColor = "";
-    let textColor = "";
-
-    switch (status) {
-      case "Published":
-        bgColor = "bg-green-900";
-        textColor = "text-green-300";
-        break;
-      case "Draft":
-        bgColor = "bg-yellow-900";
-        textColor = "text-yellow-300";
-        break;
-      case "Scheduled":
-        bgColor = "bg-blue-900";
-        textColor = "text-blue-300";
-        break;
-      default:
-        bgColor = "bg-gray-900";
-        textColor = "text-gray-300";
-    }
-
+    const statusStyles = {
+      Published: "bg-green-900 text-green-300",
+      Draft: "bg-yellow-900 text-yellow-300",
+      Scheduled: "bg-blue-900 text-blue-300",
+    };
+    
     return (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColor} ${textColor}`}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          statusStyles[status] || "bg-gray-900 text-gray-300"
+        }`}
       >
         {status}
       </span>
     );
+  };
+
+  // Action handlers
+  const handleEdit = (post) => {
+    navigate(`/dashboard/blog/edit/${post.id}`, { state: { post } });
+  };
+
+  const handleDelete = (postId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this post?");
+    if (confirmDelete && onDelete) {
+      onDelete(postId);
+    }
+  };
+
+  const handleView = (post) => {
+    navigate(`/dashboard/blog/view/${post.id}`, { state: { post } });
   };
 
   return (
@@ -129,87 +128,36 @@ const BlogPostsTable = ({ posts }) => {
 
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-[#334155]">
+            {/* Table Header */}
             <thead className="bg-[#0f172a]">
               <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("title")}
-                >
-                  <div className="flex items-center">
-                    Title {getSortIcon("title")}
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("author")}
-                >
-                  <div className="flex items-center">
-                    Author {getSortIcon("author")}
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("category")}
-                >
-                  <div className="flex items-center">
-                    Category {getSortIcon("category")}
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("status")}
-                >
-                  <div className="flex items-center">
-                    Status {getSortIcon("status")}
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("date")}
-                >
-                  <div className="flex items-center">
-                    Date {getSortIcon("date")}
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("views")}
-                >
-                  <div className="flex items-center">
-                    Views {getSortIcon("views")}
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("comments")}
-                >
-                  <div className="flex items-center">
-                    Comments {getSortIcon("comments")}
-                  </div>
-                </th>
+                {["title", "author", "category", "status", "date", "views", "comments"].map((field) => (
+                  <th
+                    key={field}
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort(field)}
+                  >
+                    <div className="flex items-center">
+                      {field.charAt(0).toUpperCase() + field.slice(1)}
+                      {getSortIcon(field)}
+                    </div>
+                  </th>
+                ))}
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-[#94a3b8] uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
+
+            {/* Table Body */}
             <tbody className="bg-[#1e293b] divide-y divide-[#334155]">
               {currentPosts.map((post) => (
                 <tr key={post.id} className="hover:bg-[#0f172a]">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      {post.featured && (
-                        <FaStar className="text-yellow-400 mr-2" />
-                      )}
-                      <div className="text-sm font-medium text-white">
-                        {post.title}
-                      </div>
+                      {post.featured && <FaStar className="text-yellow-400 mr-2" />}
+                      <div className="text-sm font-medium text-white">{post.title}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -241,18 +189,21 @@ const BlogPostsTable = ({ posts }) => {
                       <button
                         className="text-[#818cf8] hover:text-[#a5b4fc]"
                         title="Edit"
+                        onClick={() => handleEdit(post)}
                       >
                         <FaEdit />
                       </button>
                       <button
                         className="text-[#f87171] hover:text-[#fca5a5]"
                         title="Delete"
+                        onClick={() => handleDelete(post.id)}
                       >
                         <FaTrash />
                       </button>
                       <button
                         className="text-[#94a3b8] hover:text-white"
                         title="View"
+                        onClick={() => handleView(post)}
                       >
                         <FaExternalLinkAlt />
                       </button>
@@ -277,9 +228,7 @@ const BlogPostsTable = ({ posts }) => {
                 onClick={() => paginate(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
                 className={`px-3 py-1 rounded-md ${
-                  currentPage === 1
-                    ? "bg-[#0f172a] text-[#64748b] cursor-not-allowed"
-                    : "bg-[#0f172a] text-[#94a3b8] hover:bg-[#334155]"
+                  currentPage === 1 ? "bg-[#0f172a] text-[#64748b] cursor-not-allowed" : "bg-[#0f172a] text-[#94a3b8] hover:bg-[#334155]"
                 }`}
               >
                 Previous
@@ -289,9 +238,7 @@ const BlogPostsTable = ({ posts }) => {
                   key={i}
                   onClick={() => paginate(i + 1)}
                   className={`px-3 py-1 rounded-md ${
-                    currentPage === i + 1
-                      ? "bg-[#818cf8] text-white"
-                      : "bg-[#0f172a] text-[#94a3b8] hover:bg-[#334155]"
+                    currentPage === i + 1 ? "bg-[#818cf8] text-white" : "bg-[#0f172a] text-[#94a3b8] hover:bg-[#334155]"
                   }`}
                 >
                   {i + 1}
@@ -301,9 +248,7 @@ const BlogPostsTable = ({ posts }) => {
                 onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
                 className={`px-3 py-1 rounded-md ${
-                  currentPage === totalPages
-                    ? "bg-[#0f172a] text-[#64748b] cursor-not-allowed"
-                    : "bg-[#0f172a] text-[#94a3b8] hover:bg-[#334155]"
+                  currentPage === totalPages ? "bg-[#0f172a] text-[#64748b] cursor-not-allowed" : "bg-[#0f172a] text-[#94a3b8] hover:bg-[#334155]"
                 }`}
               >
                 Next
