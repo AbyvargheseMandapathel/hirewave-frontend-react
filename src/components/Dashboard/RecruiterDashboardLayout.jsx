@@ -122,9 +122,9 @@ const RecruiterDashboardLayout = ({ children }) => {
             </li>
             <li>
               <Link 
-                to="/add-job" 
+                to="/dashboard/recruiter/jobs/create" 
                 className={`flex items-center px-4 py-3 rounded-lg ${
-                  isActive('/add-job') 
+                  isActive('/dashboard/recruiter/jobs/create') 
                     ? 'bg-[#0f172a] text-white' 
                     : 'hover:bg-[#0f172a] hover:text-white'
                 }`}
@@ -183,19 +183,6 @@ const RecruiterDashboardLayout = ({ children }) => {
               >
                 <FaClipboardList className="mr-3" />
                 <span>Applications</span>
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/dashboard/recruiter/analytics" 
-                className={`flex items-center px-4 py-3 rounded-lg ${
-                  isActive('/dashboard/recruiter/analytics') 
-                    ? 'bg-[#0f172a] text-white' 
-                    : 'hover:bg-[#0f172a] hover:text-white'
-                }`}
-              >
-                <FaChartBar className="mr-3" />
-                <span>Analytics</span>
               </Link>
             </li>
             <li>

@@ -26,6 +26,12 @@ import BlogDashboard from './pages/Dashboard/BlogDashboard';
 import JobseekerBlog from './pages/Jobseeker/JobseekerBlog';
 import RecruiterDashboard from './pages/Dashboard/RecruiterDashboard';
 import DynamicJobForm from './pages/Dashboard/DynamicJobForm';
+import RecruiterJobs from './pages/Dashboard/RecruiterJobs';
+import CreateJobMultiStep from './pages/Dashboard/CreateJobMultiStep';
+import CreateApplicationForm from './pages/Dashboard/CreateApplicationForm';
+import RecruiterCandidates from './pages/Dashboard/RecruiterCandidates';
+import RecruiterInterviews from './pages/Dashboard/RecruiterInterviews';
+import RecruiterApplications from './pages/Dashboard/RecruiterApplications';
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
@@ -118,6 +124,12 @@ function App() {
         
         {/* Dynamic Job Form route */}
         <Route path="/dashboard/recruiter/create-job-form" element={<DynamicJobForm />} />
+        <Route path="/dashboard/recruiter/jobs" element={<RecruiterJobs />} />
+        <Route path="/dashboard/recruiter/jobs/create" element={<CreateJobMultiStep />} />
+        <Route path="/dashboard/recruiter/candidates" element={<RecruiterCandidates />} />
+        <Route path="/dashboard/recruiter/interviews" element={<RecruiterInterviews />} />
+        <Route path="/dashboard/recruiter/applications" element={<RecruiterApplications />} />
+        {/* <Route path="/dashboard/recruiter/create-application-form" element={<CreateApplicationForm />} /> */}
       </Routes>
     </Router>
   );

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaTrash, FaArrowUp, FaArrowDown, FaEdit, FaSave } from 'react-icons/fa';
-import DashboardLayout from '../../components/Dashboard/DashboardLayout';
+import RecruiterDashboardLayout from '../../components/Dashboard/RecruiterDashboardLayout';
 import FormFieldEditor from '../../components/Forms/FormFieldEditor';
 import FormPreview from '../../components/Forms/FormPreview';
 
@@ -129,7 +129,7 @@ const DynamicJobForm = () => {
   };
 
   return (
-    <DashboardLayout>
+    <RecruiterDashboardLayout >
       <div className="p-6">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-white">Create Custom Job Application Form</h1>
@@ -603,7 +603,7 @@ const DynamicJobForm = () => {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </RecruiterDashboardLayout>
   );
 };
 
