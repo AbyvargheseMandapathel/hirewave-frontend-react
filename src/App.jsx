@@ -32,6 +32,7 @@ import CreateApplicationForm from './pages/Dashboard/CreateApplicationForm';
 import RecruiterCandidates from './pages/Dashboard/RecruiterCandidates';
 import RecruiterInterviews from './pages/Dashboard/RecruiterInterviews';
 import RecruiterApplications from './pages/Dashboard/RecruiterApplications';
+import { useLocation } from "react-router-dom";
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
