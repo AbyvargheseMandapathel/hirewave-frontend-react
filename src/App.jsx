@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -33,6 +33,7 @@ import RecruiterCandidates from './pages/Dashboard/RecruiterCandidates';
 import RecruiterInterviews from './pages/Dashboard/RecruiterInterviews';
 import RecruiterApplications from './pages/Dashboard/RecruiterApplications';
 import { useLocation } from "react-router-dom";
+import featureFlags from './config/featureFlags';
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
@@ -50,87 +51,133 @@ const Layout = ({ children }) => {
   );
 };
 
+// Feature-flagged route component
+const FeatureRoute = ({ flag, element, fallbackPath = "/" }) => {
+  return featureFlags[flag] ? element : <Navigate to={fallbackPath} replace />;
+};
+
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={
-          <Layout>
-            <Home />
-          </Layout>
-        } />
-        <Route path="/login" element={
-          <Layout>
-            <Login />
-          </Layout>
-        } />
-        <Route path="/signup" element={
-          <Layout>
-            <Signup />
-          </Layout>
-        } />
-        <Route path="/refer-and-win" element={
-          <Layout>
-            <ReferAndWin />
-          </Layout>
-        } />
-        <Route path="/feedback" element={
-          <Layout>
-            <Feedback />
-          </Layout>
-        } />
-        <Route path="/contact-us" element={
-          <Layout>
-            <ContactUs />
-          </Layout>
-        } />
-        <Route path="/about-us" element={
-          <Layout>
-            <AboutUs />
-          </Layout>
-        } />
-        <Route path="/job/:id" element={
-          <Layout>
-            <Job />
-          </Layout>
-        } />
-        <Route path="/add-job" element={
-          <Layout>
-            <AddJobUpdate />
-          </Layout>
-        } />
-        <Route path="/dashboard/admin" element={<AdminDashboard />} />
-        <Route path="/dashboard/admin/financial" element={<FinancialDashboard />} />
-        <Route path="/dashboard/admin/jobs" element={<JobsAdminDashboard />} />
-        <Route path="/dashboard/admin/jobs/:jobId" element={<JobDetailPage />} />
-        <Route path="/dashboard/users" element={<UsersDashboard />} />
+        {/* Core routes - always available */}
+        <Route path="/" element={<Layout><Home /></Layout>} />
+        <Route path="/login" element={<Layout><Login /></Layout>} />
+        <Route path="/signup" element={<Layout><Signup /></Layout>} />
+        <Route path="/contact-us" element={<Layout><ContactUs /></Layout>} />
+        <Route path="/about-us" element={<Layout><AboutUs /></Layout>} />
+        <Route path="/job/:id" element={<Layout><Job /></Layout>} />
+        <Route path="/add-job" element={<Layout><AddJobUpdate /></Layout>} />
+        <Route path="/recruiter-signup" element={<Layout><RecruiterSignup /></Layout>} />
+        
+        {/* Feature-flagged routes */}
+        {/* Refer and Win feature */}
+        <Route 
+          path="/refer-and-win" 
+          element={featureFlags.referAndWin ? <Layout><ReferAndWin /></Layout> : <Navigate to="/" replace />} 
+        />
+        
+        {/* Feedback feature - always enabled */}
+        <Route path="/feedback" element={<Layout><Feedback /></Layout>} />
+        
+        {/* Admin Dashboard routes */}
+        <Route 
+          path="/dashboard/admin" 
+          element={featureFlags.adminDashboard ? <AdminDashboard /> : <Navigate to="/" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/admin/financial" 
+          element={featureFlags.financialDashboard ? <FinancialDashboard /> : <Navigate to="/dashboard/admin" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/admin/jobs" 
+          element={featureFlags.jobsAdminDashboard ? <JobsAdminDashboard /> : <Navigate to="/dashboard/admin" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/admin/jobs/:jobId" 
+          element={featureFlags.jobsAdminDashboard ? <JobDetailPage /> : <Navigate to="/dashboard/admin" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/users" 
+          element={featureFlags.usersManagement ? <UsersDashboard /> : <Navigate to="/dashboard/admin" replace />} 
+        />
+        
         <Route path="/dashboard/settings" element={<Settings />} />
-        <Route path="/dashboard/admin/blog" element={<BlogAdminDashboard />} />
-        {/* <Route path="/dashboard/blog" element={<BlogDashboard />} /> */}
-        <Route path="/dashboard/blog/create" element={<BlogPostCreate />} />
-        <Route path="/dashboard/blog/edit/:postId" element={<BlogPostEdit />} />
-        <Route path="/dashboard/blog/view/:postId" element={<BlogPostView />} />
-        <Route path="/recruiter-signup" element={
-          <Layout>
-            <RecruiterSignup />
-          </Layout>
-        } />
         
-        {/* Add these new routes for jobseeker blog */}
-        <Route path="/jobseeker/blog" element={<JobseekerBlog />} />
-        <Route path="/jobseeker/blog/:postId" element={<BlogPostView />} />
+        {/* Blog Admin routes */}
+        <Route 
+          path="/dashboard/admin/blog" 
+          element={featureFlags.blogAdmin ? <BlogAdminDashboard /> : <Navigate to="/dashboard/admin" replace />} 
+        />
         
-        {/* Add JobMetricsOverview route */}
-        <Route path="/dashboard/recruiter" element={<RecruiterDashboard />} />
+        <Route 
+          path="/dashboard/blog/create" 
+          element={featureFlags.blogAdmin ? <BlogPostCreate /> : <Navigate to="/dashboard/admin" replace />} 
+        />
         
-        {/* Dynamic Job Form route */}
-        <Route path="/dashboard/recruiter/create-job-form" element={<DynamicJobForm />} />
-        <Route path="/dashboard/recruiter/jobs" element={<RecruiterJobs />} />
-        <Route path="/dashboard/recruiter/jobs/create" element={<CreateJobMultiStep />} />
-        <Route path="/dashboard/recruiter/candidates" element={<RecruiterCandidates />} />
-        <Route path="/dashboard/recruiter/interviews" element={<RecruiterInterviews />} />
-        <Route path="/dashboard/recruiter/applications" element={<RecruiterApplications />} />
-        {/* <Route path="/dashboard/recruiter/create-application-form" element={<CreateApplicationForm />} /> */}
+        <Route 
+          path="/dashboard/blog/edit/:postId" 
+          element={featureFlags.blogAdmin ? <BlogPostEdit /> : <Navigate to="/dashboard/admin" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/blog/view/:postId" 
+          element={featureFlags.blogAdmin ? <BlogPostView /> : <Navigate to="/dashboard/admin" replace />} 
+        />
+        
+        {/* Jobseeker Blog routes */}
+        <Route 
+          path="/jobseeker/blog" 
+          element={featureFlags.jobseekerBlog ? <JobseekerBlog /> : <Navigate to="/" replace />} 
+        />
+        
+        <Route 
+          path="/jobseeker/blog/:postId" 
+          element={featureFlags.jobseekerBlog ? <BlogPostView /> : <Navigate to="/" replace />} 
+        />
+        
+        {/* Recruiter Dashboard routes */}
+        <Route 
+          path="/dashboard/recruiter" 
+          element={featureFlags.recruiterDashboard ? <RecruiterDashboard /> : <Navigate to="/" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/recruiter/create-job-form" 
+          element={featureFlags.dynamicJobForm ? <DynamicJobForm /> : <Navigate to="/dashboard/recruiter" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/recruiter/jobs" 
+          element={featureFlags.recruiterJobs ? <RecruiterJobs /> : <Navigate to="/dashboard/recruiter" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/recruiter/jobs/create" 
+          element={featureFlags.multiStepJobCreation ? <CreateJobMultiStep /> : <Navigate to="/dashboard/recruiter/jobs" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/recruiter/candidates" 
+          element={featureFlags.recruiterCandidates ? <RecruiterCandidates /> : <Navigate to="/dashboard/recruiter" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/recruiter/interviews" 
+          element={featureFlags.recruiterInterviews ? <RecruiterInterviews /> : <Navigate to="/dashboard/recruiter" replace />} 
+        />
+        
+        <Route 
+          path="/dashboard/recruiter/applications" 
+          element={featureFlags.recruiterApplications ? <RecruiterApplications /> : <Navigate to="/dashboard/recruiter" replace />} 
+        />
+        
+        {/* Catch-all route - redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

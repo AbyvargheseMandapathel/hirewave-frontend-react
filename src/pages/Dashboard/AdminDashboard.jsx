@@ -6,6 +6,7 @@ import VisitorAnalytics from '../../components/Dashboard/VisitorAnalytics';
 import RecentActivityLog from '../../components/Dashboard/RecentActivityLog';
 import TopCandidates from '../../components/Dashboard/TopCandidates';
 import { FaUsers, FaBriefcase, FaRss, FaChartLine, FaMoneyBillWave } from 'react-icons/fa';
+import FeatureFlagsPanel from './FeatureFlagsPanel';
 
 const AdminDashboard = () => {
   const [visitorData, setVisitorData] = useState([]);
@@ -107,6 +108,13 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+      
+      {/* Only show in development */}
+      {import.meta.env.MODE === 'development' && (
+        <div className="mt-6">
+          <FeatureFlagsPanel />
+        </div>
+      )}
     </DashboardLayout>
   );
 };
