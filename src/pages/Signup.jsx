@@ -3,23 +3,31 @@ import React from 'react';
 import SignupForm from '../components/Signup/SignupForm';
 import { Link } from 'react-router-dom';
 import { FaUserTie } from 'react-icons/fa';
+import Navbar from '../components/Navbar';
 
 const Signup = () => {
+  // Check if signup options are enabled via environment variable
+  const isSignupOptionsEnabled = import.meta.env.VITE_ENABLE_SIGNUP_OPTIONS === 'true';
+
   return (
+    <>
+    <Navbar/>
     <div className="flex flex-col lg:flex-row min-h-[calc(100vh-200px)]">
       {/* Left Column - Signup Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <SignupForm />
           
-          {/* Add recruiter signup link */}
-          <div className="mt-4 flex justify-center items-center bg-[#0f172a] p-3 rounded-lg border border-[#334155]">
-            <FaUserTie className="text-[#818cf8] mr-2" />
-            <span className="text-[#94a3b8]">Are you hiring? </span>
-            <Link to="/recruiter-signup" className="text-[#818cf8] hover:text-[#a5b4fc] font-medium ml-2">
-              Sign up as a recruiter
-            </Link>
-          </div>
+          {/* Add recruiter signup link - conditionally rendered */}
+          {isSignupOptionsEnabled && (
+            <div className="mt-4 flex justify-center items-center bg-[#0f172a] p-3 rounded-lg border border-[#334155]">
+              <FaUserTie className="text-[#818cf8] mr-2" />
+              <span className="text-[#94a3b8]">Are you hiring? </span>
+              <Link to="/recruiter-signup" className="text-[#818cf8] hover:text-[#a5b4fc] font-medium ml-2">
+                Sign up as a recruiter
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
@@ -40,6 +48,7 @@ const Signup = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

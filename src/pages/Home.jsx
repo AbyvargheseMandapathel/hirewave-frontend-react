@@ -1,6 +1,7 @@
 import React from 'react';
 import HeroHeading from '../components/HeroHeading/HeroHeading';
 import JobsGrid from '../components/JobsGrid/JobsGrid';
+import Navbar from '../components/Navbar'
 
 const Home = () => {
   const jobs = [
@@ -55,10 +56,13 @@ const Home = () => {
   ];
 
   return (
-    <div className="p-6 md:p-10">
-      <HeroHeading />
-      <JobsGrid jobs={jobs} />
-    </div>
+    <>
+      <Navbar />
+      <div className="p-6 md:p-10">
+        <HeroHeading />
+        <JobsGrid jobs={jobs} />
+      </div>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaSearch, FaEllipsisV } from 'react-icons/fa';
 import DashboardLayout from '../../components/Dashboard/DashboardLayout';
@@ -8,7 +8,7 @@ import BlogCommentsManagement from '../../components/Blog/BlogCommentsManagement
 
 const BlogDashboard = () => {
   // Mock data for blog stats
-  const [stats, setStats] = useState({
+  const [stats] = useState({
     totalPosts: 24,
     publishedPosts: 18,
     draftPosts: 6,

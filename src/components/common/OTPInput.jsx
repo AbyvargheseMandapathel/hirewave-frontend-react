@@ -1,61 +1,33 @@
 import React from 'react';
 
-const OtpInput = ({ otp, setOtp, length = 6 }) => {
+const OTPInput = ({ otp, onChange, onKeyDown, onPaste }) => {
+  // Add a safety check to ensure onChange is a function
   const handleChange = (index, value) => {
-    if (value && !/^\d+$/.test(value)) return;
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    if (value && index < length - 1) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      if (nextInput) nextInput.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      if (prevInput) prevInput.focus();
-    }
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text');
-    if (!/^\d+$/.test(pastedData)) return;
-    const digits = pastedData.slice(0, length).split('');
-    const newOtp = [...otp];
-    digits.forEach((digit, index) => {
-      if (index < length) newOtp[index] = digit;
-    });
-    setOtp(newOtp);
-    for (let i = digits.length; i < length; i++) {
-      const nextInput = document.getElementById(`otp-${i}`);
-      if (nextInput) {
-        nextInput.focus();
-        break;
-      }
-      if (i === length - 1) document.getElementById(`otp-${length - 1}`).focus();
+    if (typeof onChange === 'function') {
+      onChange(index, value);
+    } else {
+      console.error('onChange prop is not a function');
     }
   };
 
   return (
-    <div className="flex justify-between gap-2">
+    <div className="flex justify-between mb-6">
       {otp.map((digit, index) => (
         <input
           key={index}
           id={`otp-${index}`}
           type="text"
+          maxLength="1"
           value={digit}
           onChange={(e) => handleChange(index, e.target.value)}
-          onKeyDown={(e) => handleKeyDown(index, e)}
-          onPaste={index === 0 ? handlePaste : undefined}
-          maxLength={1}
-          className="w-12 h-12 text-center text-xl bg-[#0f172a] text-white rounded-lg border border-[#334155] focus:outline-none focus:ring-2 focus:ring-[#818cf8] focus:border-transparent"
+          onKeyDown={(e) => typeof onKeyDown === 'function' ? onKeyDown(index, e) : null}
+          onPaste={index === 0 && typeof onPaste === 'function' ? onPaste : undefined}
+          className="w-12 h-12 text-center text-xl font-bold bg-[#1e293b] border border-[#334155] rounded-lg focus:border-[#818cf8] focus:ring-1 focus:ring-[#818cf8] text-white"
+          autoFocus={index === 0}
         />
       ))}
     </div>
   );
 };
 
-export default OtpInput;
+export default OTPInput;

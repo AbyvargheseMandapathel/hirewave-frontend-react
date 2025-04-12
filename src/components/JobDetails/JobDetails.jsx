@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaBriefcase, FaClock } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaBriefcase, FaClock, FaExternalLinkAlt } from 'react-icons/fa';
 import SimilarJobs from '../SimilarJobs/SimilarJobs';
 import AdCard from '../AdCard/AdCard';
+import ProtectedApplyButton from '../common/ProtectedApplyButton';
+import Button from '../common/Button';
+import { isLoggedIn } from '../../services/authService';
 
 const JobDetails = ({ job, jobs }) => {
   // Filter similar jobs (exclude current job)
   const similarJobs = jobs?.filter(j => j.id !== job?.id).slice(0, 3) || [];
   const [mainHeight, setMainHeight] = useState(0);
+  const navigate = useNavigate();
   
   // Get the height of the main content to set the max height for the sidebar
   useEffect(() => {
@@ -23,6 +27,20 @@ const JobDetails = ({ job, jobs }) => {
     
     return () => window.removeEventListener('resize', updateHeight);
   }, [job]);
+
+  // Handle external application - with login check
+  const handleExternalApply = () => {
+    if (isLoggedIn()) {
+      console.log('User is logged in, proceeding to external link...');
+      // User is logged in, proceed to external link
+      if (job?.externalLink) {
+        window.open(job.externalLink, '_blank', 'noopener,noreferrer');
+      }
+    } else {
+      // User is not logged in, redirect to login with return URL
+      navigate(`/login?returnUrl=/job/${job?.id}`);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6 md:p-10">
@@ -88,13 +106,29 @@ const JobDetails = ({ job, jobs }) => {
               </div>
             )}
 
-            {/* Apply Button */}
-            <Link
-              to="/apply"
-              className="bg-gradient-to-r from-[#818cf8] to-[#a5b4fc] text-white px-8 py-3 rounded-lg hover:from-[#a5b4fc] hover:to-[#818cf8] transition-all duration-300 inline-block w-full text-center"
-            >
-              Apply Now
-            </Link>
+            {/* Apply Button - Show different buttons based on whether it's an external job */}
+            {job?.externalLink ? (
+              <Button
+                onClick={handleExternalApply}
+                className="bg-gradient-to-r from-[#818cf8] to-[#a5b4fc] text-white px-8 py-3 rounded-lg hover:from-[#a5b4fc] hover:to-[#818cf8] transition-all duration-300 w-full"
+                variant="primary"
+                size="lg"
+              >
+                <div className="flex items-center justify-center">
+                  <span>Apply on Company Website</span>
+                  <FaExternalLinkAlt className="ml-2" />
+                </div>
+              </Button>
+            ) : (
+              <ProtectedApplyButton
+                jobId={job?.id}
+                className="bg-gradient-to-r from-[#818cf8] to-[#a5b4fc] text-white px-8 py-3 rounded-lg hover:from-[#a5b4fc] hover:to-[#818cf8] transition-all duration-300 w-full"
+                variant="primary"
+                size="lg"
+              >
+                Apply Now
+              </ProtectedApplyButton>
+            )}
           </div>
         </div>
 

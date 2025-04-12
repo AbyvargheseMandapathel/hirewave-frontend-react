@@ -7,10 +7,10 @@ const FeatureFlagsPanel = () => {
   
   useEffect(() => {
     // Check if we're in development environment
-    setIsDev(process.env.NODE_ENV === 'development');
+    setIsDev(import.meta.env.MODE === 'development');
     
     // Load any saved flags from localStorage in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
       const savedFlags = localStorage.getItem('devFeatureFlags');
       if (savedFlags) {
         setFlags(JSON.parse(savedFlags));
@@ -23,7 +23,7 @@ const FeatureFlagsPanel = () => {
     setFlags(newFlags);
     
     // Save to localStorage in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
       localStorage.setItem('devFeatureFlags', JSON.stringify(newFlags));
       // Force reload to apply changes
       window.location.reload();

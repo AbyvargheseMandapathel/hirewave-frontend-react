@@ -5,6 +5,7 @@ import {
   FaBell, FaSearch, FaUserCircle, FaBars, FaTimes, 
   FaMoneyBillWave, FaSignOutAlt, FaRss
 } from 'react-icons/fa';
+import { getCurrentUser } from '../../services/authService';
 
 // Custom scrollbar styles
 const scrollbarStyles = `
@@ -30,6 +31,63 @@ const DashboardLayout = ({ children }) => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const location = useLocation();
+  
+  // Get current user and user type
+  const user = getCurrentUser();
+  const userType = user?.user_type || 'guest';
+  
+  // Get dashboard title based on user type
+  const getDashboardTitle = () => {
+    switch(userType) {
+      case 'admin':
+        return 'Admin Dashboard';
+      case 'recruiter':
+        return 'Recruiter Dashboard';
+      case 'jobseeker':
+        return 'Jobseeker Dashboard';
+      default:
+        return 'Dashboard';
+    }
+  };
+  
+  // Get navigation links based on user type
+  const getNavLinks = () => {
+    const commonLinks = [
+      { to: '/settings', icon: <FaCog />, text: 'Settings' },
+    ];
+    
+    if (userType === 'admin') {
+      return [
+        { to: '/dashboard/admin', icon: <FaHome />, text: 'Dashboard' },
+        { to: '/dashboard/admin/jobs', icon: <FaBriefcase />, text: 'Jobs' },
+        { to: '/dashboard/admin/users', icon: <FaUsers />, text: 'Users' },
+        { to: '/dashboard/admin/analytics', icon: <FaChartBar />, text: 'Analytics' },
+        { to: '/dashboard/admin/blog', icon: <FaRss />, text: 'Blog' },
+        { to: '/dashboard/admin/payments', icon: <FaMoneyBillWave />, text: 'Payments' },
+        ...commonLinks
+      ];
+    } else if (userType === 'recruiter') {
+      return [
+        { to: '/dashboard/recruiter', icon: <FaHome />, text: 'Dashboard' },
+        { to: '/dashboard/recruiter/jobs', icon: <FaBriefcase />, text: 'My Jobs' },
+        { to: '/dashboard/recruiter/applications', icon: <FaUsers />, text: 'Applications' },
+        { to: '/dashboard/recruiter/analytics', icon: <FaChartBar />, text: 'Analytics' },
+        ...commonLinks
+      ];
+    } else if (userType === 'jobseeker') {
+      return [
+        { to: '/dashboard/jobseeker', icon: <FaHome />, text: 'Dashboard' },
+        { to: '/dashboard/jobseeker/applications', icon: <FaBriefcase />, text: 'My Applications' },
+        { to: '/dashboard/jobseeker/saved-jobs', icon: <FaUsers />, text: 'Saved Jobs' },
+        { to: '/dashboard/jobseeker/profile', icon: <FaUserCircle />, text: 'My Profile' },
+        ...commonLinks
+      ];
+    }
+    
+    return commonLinks;
+  };
+  
+  const navLinks = getNavLinks();
 
   return (
     <div className="flex h-screen bg-[#0f172a]">
@@ -50,7 +108,7 @@ const DashboardLayout = ({ children }) => {
             <h2 className="text-2xl font-bold bg-gradient-to-r from-[#818cf8] to-[#a5b4fc] bg-clip-text text-transparent">
               HireWave
             </h2>
-            <p className="text-[#94a3b8] text-sm">Admin Dashboard</p>
+            <p className="text-[#94a3b8] text-sm">{getDashboardTitle()}</p>
           </div>
           <button 
             className="text-[#94a3b8] hover:text-white md:hidden"
@@ -60,132 +118,88 @@ const DashboardLayout = ({ children }) => {
           </button>
         </div>
         
-        <nav className="mt-6">
-          <div className="px-4 mb-3">
-            <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
-              Main
-            </p>
-          </div>
-          <Link 
-            to="/dashboard/admin" 
-            className={`flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white ${location.pathname === '/dashboard' ? 'bg-[#334155] text-white' : ''}`}
-          >
-            <FaHome className="mr-3" />
-            Overview
-          </Link>
-          <Link 
-            to="/dashboard/admin/jobs" 
-            className={`flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white ${location.pathname === '/dashboard/jobs' ? 'bg-[#334155] text-white' : ''}`}
-          >
-            <FaBriefcase className="mr-3" />
-            Jobs
-          </Link>
-          <Link 
-            to="/dashboard/users" 
-            className={`flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white ${location.pathname === '/dashboard/users' ? 'bg-[#334155] text-white' : ''}`}
-          >
-            <FaUsers className="mr-3" />
-            Users
-          </Link>
-          {/* Updated Blog section with correct path */}
-          <Link 
-            to="/dashboard/admin/blog" 
-            className={`flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white ${location.pathname.includes('/dashboard/admin/blog') ? 'bg-[#334155] text-white' : ''}`}
-          >
-            <FaRss className="mr-3" />
-            Blog
-          </Link>
-          <Link 
-            to="/dashboard/admin/financial" 
-            className={`flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white ${location.pathname === '/dashboard/financial' ? 'bg-[#334155] text-white' : ''}`}
-          >
-            <FaMoneyBillWave className="mr-3" />
-            Financial
-          </Link>
-          
-          <div className="px-4 mt-6 mb-3">
-            <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
-              Settings
-            </p>
-          </div>
-          <Link 
-            to="/dashboard/settings" 
-            className={`flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white ${location.pathname === '/dashboard/settings' ? 'bg-[#334155] text-white' : ''}`}
-          >
-            <FaCog className="mr-3" />
-            Settings
-          </Link>
-          <Link 
-            to="/logout" 
-            className="flex items-center px-4 py-3 text-[#94a3b8] hover:bg-[#334155] hover:text-white"
+        {/* Navigation */}
+        <nav className="p-4">
+          <ul className="space-y-2">
+            {navLinks.map((link, index) => (
+              <li key={index}>
+                <Link
+                  to={link.to}
+                  className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                    location.pathname === link.to
+                      ? 'bg-[#0f172a] text-white'
+                      : 'text-[#94a3b8] hover:bg-[#0f172a] hover:text-white'
+                  }`}
+                >
+                  <span className="mr-3">{link.icon}</span>
+                  {link.text}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        
+        {/* Logout button at bottom */}
+        <div className="absolute bottom-0 w-full p-4 border-t border-[#334155]">
+          <Link
+            to="/logout"
+            className="flex items-center px-4 py-3 rounded-lg text-[#94a3b8] hover:bg-[#0f172a] hover:text-white transition-colors"
           >
             <FaSignOutAlt className="mr-3" />
             Logout
           </Link>
-        </nav>
+        </div>
       </div>
-      
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Navigation */}
-        <header className="bg-[#1e293b] border-b border-[#334155] shadow-sm">
-          <div className="flex items-center justify-between p-4">
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden md:ml-0">
+        {/* Top navigation */}
+        <header className="bg-[#1e293b] border-b border-[#334155] p-4">
+          <div className="flex justify-between items-center">
             {/* Mobile menu button */}
-            <button 
+            <button
               className="text-[#94a3b8] hover:text-white md:hidden"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              onClick={() => setIsSidebarOpen(true)}
             >
               <FaBars />
             </button>
             
-            {/* Search */}
-            <div className="relative flex-1 max-w-md mx-4 hidden md:block">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                <FaSearch className="text-[#64748b]" />
-              </span>
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="w-full bg-[#0f172a] text-white pl-10 pr-4 py-2 rounded-lg border border-[#334155] focus:outline-none focus:ring-2 focus:ring-[#818cf8] focus:border-transparent"
-              />
+            {/* Search bar */}
+            <div className="hidden md:flex flex-1 mx-4">
+              <div className="relative w-full max-w-md">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="w-full bg-[#0f172a] text-[#94a3b8] border border-[#334155] rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#818cf8]"
+                />
+                <FaSearch className="absolute left-3 top-3 text-[#64748b]" />
+              </div>
             </div>
             
-            {/* Right side icons */}
+            {/* User actions */}
             <div className="flex items-center space-x-4">
               {/* Notifications */}
               <div className="relative">
-                <button 
-                  className="text-[#94a3b8] hover:text-white p-1 rounded-full hover:bg-[#334155]"
-                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                <button
+                  className="text-[#94a3b8] hover:text-white p-1"
+                  onClick={() => {
+                    setIsNotificationsOpen(!isNotificationsOpen);
+                    setIsUserDropdownOpen(false);
+                  }}
                 >
                   <FaBell />
-                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
                 </button>
                 
-                {/* Notifications dropdown */}
+                {/* Notification dropdown */}
                 {isNotificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-[#1e293b] border border-[#334155] rounded-lg shadow-lg z-50">
+                  <div className="absolute right-0 mt-2 w-80 bg-[#1e293b] border border-[#334155] rounded-lg shadow-lg z-10">
                     <div className="p-4 border-b border-[#334155]">
                       <h3 className="text-white font-medium">Notifications</h3>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
-                      <div className="p-4 border-b border-[#334155] hover:bg-[#334155]">
-                        <p className="text-[#94a3b8]">New user registered</p>
-                        <p className="text-xs text-[#64748b]">2 hours ago</p>
+                      <div className="p-4 border-b border-[#334155]">
+                        <p className="text-[#94a3b8]">No new notifications</p>
                       </div>
-                      <div className="p-4 border-b border-[#334155] hover:bg-[#334155]">
-                        <p className="text-[#94a3b8]">New job posted</p>
-                        <p className="text-xs text-[#64748b]">5 hours ago</p>
-                      </div>
-                      <div className="p-4 hover:bg-[#334155]">
-                        <p className="text-[#94a3b8]">System update completed</p>
-                        <p className="text-xs text-[#64748b]">1 day ago</p>
-                      </div>
-                    </div>
-                    <div className="p-2 text-center border-t border-[#334155]">
-                      <button className="text-[#818cf8] hover:text-[#a5b4fc] text-sm">
-                        View all notifications
-                      </button>
                     </div>
                   </div>
                 )}
@@ -193,37 +207,38 @@ const DashboardLayout = ({ children }) => {
               
               {/* User profile */}
               <div className="relative">
-                <button 
+                <button
                   className="flex items-center text-[#94a3b8] hover:text-white"
-                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  onClick={() => {
+                    setIsUserDropdownOpen(!isUserDropdownOpen);
+                    setIsNotificationsOpen(false);
+                  }}
                 >
-                  <FaUserCircle className="h-8 w-8 text-[#818cf8]" />
-                  <span className="ml-2 hidden md:block">Admin User</span>
+                  <FaUserCircle className="text-xl mr-2" />
+                  <span className="hidden md:inline">
+                    {user?.first_name && user?.last_name 
+                      ? `${user.first_name} ${user.last_name}` 
+                      : user?.email || 'User'}
+                  </span>
                 </button>
                 
                 {/* User dropdown */}
                 {isUserDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-[#1e293b] border border-[#334155] rounded-lg shadow-lg z-50">
+                  <div className="absolute right-0 mt-2 w-48 bg-[#1e293b] border border-[#334155] rounded-lg shadow-lg z-10">
                     <div className="p-4 border-b border-[#334155]">
-                      <p className="text-white font-medium">Admin User</p>
-                      <p className="text-xs text-[#64748b]">admin@hirewave.com</p>
+                      <h3 className="text-white font-medium">{user?.email || 'User'}</h3>
+                      <p className="text-[#94a3b8] text-sm capitalize">{userType}</p>
                     </div>
                     <div>
-                      <Link 
-                        to="/dashboard/profile" 
-                        className="block p-4 text-[#94a3b8] hover:bg-[#334155] hover:text-white"
-                      >
-                        Profile
-                      </Link>
-                      <Link 
-                        to="/dashboard/settings" 
-                        className="block p-4 text-[#94a3b8] hover:bg-[#334155] hover:text-white"
+                      <Link
+                        to="/settings"
+                        className="block px-4 py-2 text-[#94a3b8] hover:bg-[#0f172a] hover:text-white"
                       >
                         Settings
                       </Link>
-                      <Link 
-                        to="/logout" 
-                        className="block p-4 text-[#94a3b8] hover:bg-[#334155] hover:text-white border-t border-[#334155]"
+                      <Link
+                        to="/logout"
+                        className="block px-4 py-2 text-[#94a3b8] hover:bg-[#0f172a] hover:text-white"
                       >
                         Logout
                       </Link>
@@ -235,8 +250,8 @@ const DashboardLayout = ({ children }) => {
           </div>
         </header>
         
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto">
+        {/* Main content area */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {children}
         </main>
       </div>

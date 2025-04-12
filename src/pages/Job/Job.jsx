@@ -19,7 +19,8 @@ const jobs = [
       "Proficient with TypeScript",
       "Experience with Redux",
       "Strong understanding of REST APIs"
-    ]
+    ],
+    externalLink: "https://techcorp.com/careers/senior-react-developer"
   },
   {
     id: '2',
@@ -67,7 +68,8 @@ const jobs = [
       "Strong technical background",
       "Experience in agile methodologies",
       "Proven track record of successful product launches"
-    ]
+    ],
+    externalLink: "https://techcorp.com/careers/senior-react-developer2"
   },
   {
     id: '5',
@@ -83,7 +85,8 @@ const jobs = [
       "Experience with Python or R",
       "Knowledge of machine learning algorithms",
       "Ability to work independently"
-    ]
+    ],
+    externalLink: "https://techcorp.com/careers/senior-react-developer1"
   },
   {
     id: '6',
@@ -99,7 +102,8 @@ const jobs = [
       "Proficient in Swift or Kotlin",
       "Experience with mobile design patterns",
       "Understanding of mobile security"
-    ]
+    ],
+    externalLink: "https://techcorp.com/careers/senior-react-developer"
   }
 ];
 
@@ -116,3 +120,8 @@ const Job = () => {
 };
 
 export default Job;
+
+
+// Find the Apply Now button in your Job.jsx file and replace it with:
+
+// Import the ProtectedApplyButton at the top of the file
