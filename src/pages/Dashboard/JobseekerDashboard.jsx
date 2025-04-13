@@ -5,6 +5,7 @@ import { getJobseekerDashboardStats } from '../../services/dashboardService';
 import { Link } from 'react-router-dom';
 
 const JobseekerDashboard = () => {
+  // Set default values with 'Coming Soon' text
   const [stats, setStats] = useState({
     savedJobsCount: 0,
     appliedJobsCount: 'Coming Soon',
@@ -19,7 +20,14 @@ const JobseekerDashboard = () => {
       try {
         setLoading(true);
         const dashboardStats = await getJobseekerDashboardStats();
-        setStats(dashboardStats);
+        
+        // Ensure we preserve 'Coming Soon' for any missing properties
+        setStats({
+          savedJobsCount: dashboardStats.savedJobsCount || 0,
+          appliedJobsCount: dashboardStats.appliedJobsCount || 'Coming Soon',
+          interviewsCount: dashboardStats.interviewsCount || 'Coming Soon',
+          upcomingCount: dashboardStats.upcomingCount || 'Coming Soon'
+        });
       } catch (err) {
         console.error('Error fetching dashboard stats:', err);
         setError('Failed to load dashboard data');

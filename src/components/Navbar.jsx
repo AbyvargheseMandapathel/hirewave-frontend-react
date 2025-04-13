@@ -38,12 +38,12 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link
+            {/* <Link
               to="/refer-and-win"
               className="hover:text-white transition-colors duration-200"
             >
               <FaGift className="h-6 w-6" />
-            </Link>
+            </Link> */}
             
             {/* Conditional rendering based on login status */}
             {user ? (

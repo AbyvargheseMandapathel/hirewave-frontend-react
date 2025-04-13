@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 import random
+from ckeditor.fields import RichTextField
 
 User = get_user_model()
 
@@ -11,6 +12,7 @@ class Job(models.Model):
         ('full-time', 'Full Time'),
         ('part-time', 'Part Time'),
         ('contract', 'Contract'),
+        ('freelance', 'Freelance'),  # Added to match frontend options
         ('internship', 'Internship'),
         ('remote', 'Remote'),
     ]
@@ -27,13 +29,17 @@ class Job(models.Model):
     location = models.CharField(max_length=255)
     salary = models.CharField(max_length=100)
     type = models.CharField(max_length=20, choices=JOB_TYPE_CHOICES)
-    description = models.TextField()
-    requirements = models.TextField()
+    description = RichTextField()
+    requirements = RichTextField()
     posted_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='jobs')
     status = models.CharField(max_length=20, choices=JOB_STATUS_CHOICES, default='active')
     external_link = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # Additional fields to track application metrics
+    views = models.PositiveIntegerField(default=0)
+    applications = models.PositiveIntegerField(default=0)
     
     def __str__(self):
         return self.title
@@ -44,7 +50,7 @@ class SavedJob(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        unique_together = ('user', 'job')  # Prevent duplicate saves
+        unique_together = ('user', 'job')
         
     def __str__(self):
         return f"{self.user.email} saved {self.job.title}"

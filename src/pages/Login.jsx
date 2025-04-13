@@ -1,17 +1,18 @@
-import React, { useState,useEffect } from 'react';
-import { Link, useNavigate,useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaEnvelope, FaArrowLeft, FaUserTie } from 'react-icons/fa';
 import InputField from '../components/common/InputField';
 import Button from '../components/common/Button';
 import SocialLoginButtons from '../components/common/SocialLoginButtons';
 import OTPInput from '../components/common/OTPInput';
 import { requestOTP, verifyOTP, resendOTP } from '../services/authService';
-import Navbar from '../components/Navbar';
-
+import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios'; // Import axios directly
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login, setAuthState } = useAuth(); // Get login function from auth context
   const [email, setEmail] = useState('');
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -25,6 +26,8 @@ const Login = () => {
     const returnPath = params.get('returnUrl');
     if (returnPath) {
       setReturnUrl(returnPath);
+    } else if (location.state && location.state.from) {
+      setReturnUrl(location.state.from);
     }
   }, [location]);
 
@@ -70,10 +73,54 @@ const Login = () => {
       const response = await verifyOTP(email, otp);
       console.log('Login successful:', response);
       
+      // Store tokens consistently
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('accessToken', response.token); // Add both formats
+        sessionStorage.setItem('token', response.token);
+        
+        // Set axios default header
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
+        
+        console.log('Token saved successfully');
+      } else if (response.access) {
+        localStorage.setItem('token', response.access);
+        localStorage.setItem('accessToken', response.access);
+        sessionStorage.setItem('token', response.access);
+        
+        // Set axios default header
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.access}`;
+        
+        console.log('Access token saved successfully');
+      } else {
+        console.warn('No token received from server');
+      }
+      
+      // Store user data
+      if (response.user) {
+        localStorage.setItem('user', JSON.stringify(response.user));
+        
+        // Also save user role/admin status
+        if (response.user.is_admin) {
+          localStorage.setItem('isAdmin', 'true');
+        } else {
+          localStorage.setItem('isAdmin', 'false');
+        }
+      }
+      
+      // Update auth context to reflect logged in state
+      if (setAuthState) {
+        setAuthState({ 
+          isAuthenticated: true, 
+          user: response.user, 
+          loading: false 
+        });
+      }
+      
       // Add a small delay to ensure localStorage is updated
       setTimeout(() => {
-        // Redirect to dashboard router instead of returnUrl
-        navigate('/dashboard');
+        // Navigate to returnUrl if available, otherwise to dashboard
+        navigate(returnUrl !== '/' ? returnUrl : '/dashboard');
       }, 500);
     } catch (err) {
       console.error('OTP verification error:', err);
@@ -261,7 +308,7 @@ const Login = () => {
       <div className="hidden lg:flex lg:w-1/2 bg-[#0f172a] items-center justify-center p-4">
         <div className="max-w-lg">
           <img 
-            src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1172&q=80" 
+            src="/api/placeholder/500/400" 
             alt="Login" 
             className="rounded-xl shadow-2xl object-cover"
           />

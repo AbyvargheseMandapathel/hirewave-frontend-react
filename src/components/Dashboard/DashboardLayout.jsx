@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   FaHome, FaBriefcase, FaUsers, FaChartBar, FaCog, 
   FaBell, FaSearch, FaUserCircle, FaBars, FaTimes, 
   FaMoneyBillWave, FaSignOutAlt, FaRss
 } from 'react-icons/fa';
-import { getCurrentUser } from '../../services/authService';
+import { getCurrentUser, logout } from '../../services/authService';
 
 // Custom scrollbar styles
 const scrollbarStyles = `
@@ -31,10 +31,21 @@ const DashboardLayout = ({ children }) => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Get current user and user type
   const user = getCurrentUser();
   const userType = user?.user_type || 'guest';
+  
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   
   // Get dashboard title based on user type
   const getDashboardTitle = () => {
@@ -141,13 +152,13 @@ const DashboardLayout = ({ children }) => {
         
         {/* Logout button at bottom */}
         <div className="absolute bottom-0 w-full p-4 border-t border-[#334155]">
-          <Link
-            to="/logout"
-            className="flex items-center px-4 py-3 rounded-lg text-[#94a3b8] hover:bg-[#0f172a] hover:text-white transition-colors"
+          <button
+            onClick={handleLogout}
+            className="flex items-center w-full px-4 py-3 rounded-lg text-[#94a3b8] hover:bg-[#0f172a] hover:text-white transition-colors"
           >
             <FaSignOutAlt className="mr-3" />
             Logout
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -236,12 +247,12 @@ const DashboardLayout = ({ children }) => {
                       >
                         Settings
                       </Link>
-                      <Link
-                        to="/logout"
-                        className="block px-4 py-2 text-[#94a3b8] hover:bg-[#0f172a] hover:text-white"
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-[#94a3b8] hover:bg-[#0f172a] hover:text-white"
                       >
                         Logout
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 )}

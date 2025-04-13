@@ -82,7 +82,7 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
     
     try {
       const result = await toggleBookmark(jobId);
-      setIsSaved(result.status === 'added');
+      setIsSaved(result.is_saved);
     } catch (err) {
       console.error('Error toggling bookmark:', err);
     }

@@ -63,24 +63,30 @@ export const isJobBookmarked = async (jobId) => {
 // Toggle bookmark status (save/unsave a job)
 export const toggleBookmark = async (jobId) => {
   try {
-    // First check if the job is already saved
-    const savedJobs = await getSavedJobs();
-    const existingSavedJob = savedJobs.find(savedJob => 
-      savedJob.job === jobId || 
-      (savedJob.job_details && savedJob.job_details.id === jobId)
+    const response = await axios.post(
+      `${API_URL}/jobs/${jobId}/bookmark/`,
+      {},
+      { headers: getAuthHeader() }
     );
-    
-    if (existingSavedJob) {
-      // If job is already saved, remove it
-      await removeSavedJob(existingSavedJob.id);
-      return { saved: false, message: 'Job removed from saved jobs' };
-    } else {
-      // If job is not saved, save it
-      const result = await saveJob(jobId);
-      return { saved: true, message: 'Job saved successfully', data: result };
-    }
+    return {
+      is_saved: response.data.status === "added",
+      message: response.data.message
+    };
   } catch (error) {
-    console.error('Error toggling bookmark status:', error);
+    console.error('Error toggling bookmark:', error);
     throw error;
+  }
+};
+
+export const checkBookmarkStatus = async (jobId) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/saved-jobs/${jobId}/status/`,
+      { headers: getAuthHeader() }
+    );
+    return response.data.is_saved;
+  } catch (error) {
+    console.error('Error checking bookmark status:', error);
+    return false;
   }
 };

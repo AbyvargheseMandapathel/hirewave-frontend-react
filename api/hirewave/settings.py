@@ -144,6 +144,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Application definition
+# Add these to your INSTALLED_APPS
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -155,10 +156,13 @@ INSTALLED_APPS = [
     # Third-party apps
     'rest_framework',
     'corsheaders',
+    'rest_framework_simplejwt.token_blacklist',
+    'ckeditor',
     
     # Local apps
     'accounts',
-    'jobs'
+    'jobs',
+    
 ]
 
 MIDDLEWARE = [
@@ -170,6 +174,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'hirewave.urls'
@@ -264,3 +269,18 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For developm
 
 # OTP settings
 OTP_EXPIRY_MINUTES = 10
+
+
+# CKEditor settings
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'full',
+        'height': 300,
+        'width': 800,
+        'removePlugins': 'stylesheetparser',
+        'allowedContent': True,
+    },
+}
+
+# Add CORS headers to allow your frontend to access the API
+CORS_ALLOW_ALL_ORIGINS = True  # For development only

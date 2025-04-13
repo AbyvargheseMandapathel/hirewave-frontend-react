@@ -1,15 +1,20 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework.decorators import action
-from .models import Job
-from .serializers import JobSerializer
+from django.shortcuts import get_object_or_404  # Add this import
+from .models import Job, SavedJob
+from .serializers import JobSerializer, SavedJobSerializer
 from django.db.models import Q
 
-# Add these imports at the top
-from .models import SavedJob
-from .serializers import SavedJobSerializer
-from rest_framework import status
+# Create a custom permission class for admin users
+class IsAdminUser(BasePermission):
+    """
+    Allows access only to admin users.
+    """
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated and 
+                   (request.user.is_superuser or request.user.user_type == 'admin'))
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
@@ -21,6 +26,9 @@ class JobViewSet(viewsets.ModelViewSet):
         """
         if self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
+        elif self.action in ['create', 'update', 'partial_update', 'destroy']:
+            # Only admin users can create, update or delete jobs
+            permission_classes = [IsAdminUser]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -81,7 +89,6 @@ class JobViewSet(viewsets.ModelViewSet):
             'total': queryset.count()
         })
     
-    # Add this to your JobViewSet class
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def bookmark(self, request, pk=None):
         """
@@ -104,15 +111,60 @@ class JobViewSet(viewsets.ModelViewSet):
             return Response({"status": "added", "message": "Job added to bookmarks"}, 
                             status=status.HTTP_201_CREATED)
     
-# Add this new ViewSet for saved jobs
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new job posting
+        """
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            # Save the job with the current user as posted_by
+            serializer.save(posted_by=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Update an existing job posting
+        """
+        instance = self.get_object()
+        # Check if the user is the owner of the job
+        if instance.posted_by != request.user and not request.user.is_superuser:
+            return Response(
+                {"detail": "You do not have permission to edit this job."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# Only one SavedJobViewSet class
 class SavedJobViewSet(viewsets.ModelViewSet):
     serializer_class = SavedJobSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-        """Return saved jobs for the current user"""
         return SavedJob.objects.filter(user=self.request.user).select_related('job')
-    
+
+    @action(detail=False, methods=['post'], url_path='toggle/(?P<job_id>[^/.]+)')
+    def toggle(self, request, job_id=None):
+        job = get_object_or_404(Job, id=job_id)
+        saved_job = SavedJob.objects.filter(user=request.user, job=job).first()
+
+        if saved_job:
+            saved_job.delete()
+            return Response({
+                "is_saved": False,
+                "message": "Job removed from saved jobs"
+            })
+        else:
+            SavedJob.objects.create(user=request.user, job=job)
+            return Response({
+                "is_saved": True,
+                "message": "Job saved successfully"
+            })
+
     def perform_create(self, serializer):
-        """Save the job for the current user"""
         serializer.save(user=self.request.user)
