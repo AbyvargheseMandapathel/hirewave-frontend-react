@@ -277,7 +277,7 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
               scrollbarColor: '#475569 #1e293b'
             }}
           >
-            <AdCard />
+            {/* <AdCard /> */}
             {similarJobs.length > 0 && <SimilarJobs jobs={similarJobs} />}
           </div>
         </div>

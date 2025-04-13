@@ -137,7 +137,6 @@ const Login = () => {
 
   return (
     <>
-    <Navbar/>
     <div className="flex flex-col lg:flex-row min-h-[calc(100vh-200px)]">
       {/* Left Column - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-4">

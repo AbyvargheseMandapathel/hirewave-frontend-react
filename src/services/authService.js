@@ -135,7 +135,11 @@ export const getToken = () => {
   return localStorage.getItem('accessToken');
 };
 
-// Add this function to your existing authService.js
+// Add this function to get the authorization header
+export const getAuthHeader = () => {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 // Register new user
 export const registerUser = async (userData) => {

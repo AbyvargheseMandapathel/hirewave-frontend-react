@@ -14,10 +14,12 @@ class JobSerializer(serializers.ModelSerializer):
             return SavedJob.objects.filter(user=request.user, job=obj).exists()
         return False
 
+# Add this to your existing serializers.py file
+
 class SavedJobSerializer(serializers.ModelSerializer):
     job_details = JobSerializer(source='job', read_only=True)
     
     class Meta:
         model = SavedJob
-        fields = ['id', 'job', 'created_at', 'job_details']
-        read_only_fields = ['user']
+        fields = ['id', 'job', 'job_details', 'created_at']
+        read_only_fields = ['user', 'created_at']

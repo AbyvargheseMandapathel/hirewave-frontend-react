@@ -64,7 +64,6 @@ const Home = () => {
   
   return (
     <div className="flex flex-col min-h-screen bg-[#0f172a]">
-      <Navbar />
       <main className="flex-grow pt-20">
         <div className="container mx-auto px-4">
           <HeroHeading />

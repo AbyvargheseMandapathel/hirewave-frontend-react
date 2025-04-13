@@ -106,17 +106,13 @@ class JobViewSet(viewsets.ModelViewSet):
     
 # Add this new ViewSet for saved jobs
 class SavedJobViewSet(viewsets.ModelViewSet):
-        serializer_class = SavedJobSerializer
-        permission_classes = [IsAuthenticated]
-        
-        def get_queryset(self):
-            """
-            Return only the current user's saved jobs
-            """
-            return SavedJob.objects.filter(user=self.request.user).order_by('-created_at')
-        
-        def perform_create(self, serializer):
-            """
-            Set the user to the current user when creating
-            """
-            serializer.save(user=self.request.user)
+    serializer_class = SavedJobSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return saved jobs for the current user"""
+        return SavedJob.objects.filter(user=self.request.user).select_related('job')
+    
+    def perform_create(self, serializer):
+        """Save the job for the current user"""
+        serializer.save(user=self.request.user)

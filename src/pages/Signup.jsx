@@ -11,7 +11,6 @@ const Signup = () => {
 
   return (
     <>
-    <Navbar/>
     <div className="flex flex-col lg:flex-row min-h-[calc(100vh-200px)]">
       {/* Left Column - Signup Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-4">

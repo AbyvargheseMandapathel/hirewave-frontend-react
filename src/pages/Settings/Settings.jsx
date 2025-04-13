@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { FaUser, FaLock, FaBell, FaDesktop, FaShieldAlt, FaSignOutAlt } from 'react-icons/fa';
 import DashboardLayout from '../../components/Dashboard/DashboardLayout';
 import ProfileSettings from '../../components/Settings/ProfileSettings';
-import SecuritySettings from '../../components/Settings/SecuritySettings';
 import NotificationSettings from '../../components/Settings/NotificationSettings';
-import AppearanceSettings from '../../components/Settings/AppearanceSettings';
-import PrivacySettings from '../../components/Settings/PrivacySettings';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -46,7 +43,7 @@ const Settings = () => {
                   <span>Profile</span>
                 </button>
 
-                <button
+                {/* <button
                   onClick={() => setActiveTab('notifications')}
                   className={`w-full flex items-center px-4 py-3 rounded-lg text-left ${
                     activeTab === 'notifications'
@@ -56,7 +53,7 @@ const Settings = () => {
                 >
                   <FaBell className="mr-3" />
                   <span>Notifications</span>
-                </button>
+                </button> */}
                 
                 <div className="pt-6 border-t border-[#334155]">
                   <button

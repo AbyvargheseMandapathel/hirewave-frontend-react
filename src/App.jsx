@@ -37,11 +37,13 @@ import featureFlags from './config/featureFlags';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import DashboardRouter from './components/DashboardRouter';
 import JobseekerDashboard from './pages/Dashboard/JobseekerDashboard';
+import JobseekerSavedJobs from './pages/Dashboard/JobseekerSavedJobs';
+import ComingSoon from './pages/ComingSoon'; // Import the ComingSoon page
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
   const location = useLocation();
-  const isDashboardRoute = location.pathname.includes('/admin-dashboard');
+  const isDashboardRoute = location.pathname.includes('/dashboard') || location.pathname.includes('/settings');
   
   return (
     <div className="dark bg-[#1e293b] min-h-screen flex flex-col text-[#94a3b8]">
@@ -55,7 +57,7 @@ const Layout = ({ children }) => {
 };
 
 // Feature-flagged route component
-const FeatureRoute = ({ flag, element, fallbackPath = "/" }) => {
+const FeatureRoute = ({ flag, element, fallbackPath = "/coming-soon" }) => { // Updated fallback to coming-soon
   return featureFlags[flag] ? element : <Navigate to={fallbackPath} replace />;
 };
 
@@ -64,110 +66,187 @@ function App() {
     <div className="min-h-screen bg-[#0f172a]">
     <Router>
       <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/" element={<Layout><Home /></Layout>} />
+        <Route path="/login" element={<Layout><Login /></Layout>} />
+        <Route path="/signup" element={<Layout><Signup /></Layout>} />
+        <Route path="/recruiter-signup" element={<Layout><RecruiterSignup /></Layout>} />
+        <Route path="/refer-and-win" element={<Layout><ReferAndWin /></Layout>} />
+        <Route path="/feedback" element={<Layout><Feedback /></Layout>} />
         <Route path="/contact-us" element={<Layout><ContactUs /></Layout>} />
         <Route path="/about-us" element={<Layout><AboutUs /></Layout>} />
         <Route path="/job/:id" element={<Layout><Job /></Layout>} />
         <Route path="/add-job" element={<Layout><AddJobUpdate /></Layout>} />
-        <Route path="/recruiter-signup" element={<Layout><RecruiterSignup /></Layout>} />
+        <Route path="/settings" element={<Layout><Settings /></Layout>} />
+        <Route path="/blog" element={<Layout><JobseekerBlog /></Layout>} />
         
-        {/* Dashboard router - automatically redirects based on user type */}
+        {/* Coming Soon Page */}
+        <Route path="/coming-soon" element={<ComingSoon />} />
+        
+        {/* Dashboard Routes */}
         <Route path="/dashboard" element={<DashboardRouter />} />
         
-        {/* Protected routes for all authenticated users */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/settings" element={<Settings />} />
-        </Route>
-
-        {/* Protected routes for admin users - superusers can access these too */}
-        <Route element={<ProtectedRoute allowedUserTypes={['admin']} />}>
-          <Route path="/dashboard/admin" element={
-            featureFlags.adminDashboard ? <AdminDashboard /> : <Navigate to="/" replace />
-          } />
-          <Route path="/dashboard/admin/jobs" element={
-            featureFlags.jobsAdminDashboard ? <JobsAdminDashboard /> : <Navigate to="/dashboard/admin" replace />
-          } />
-          <Route path="/dashboard/admin/financial" element={
-            featureFlags.financialDashboard ? <FinancialDashboard /> : <Navigate to="/dashboard/admin" replace />
-          } />
-          <Route path="/dashboard/admin/jobs/:jobId" element={
-            featureFlags.jobsAdminDashboard ? <JobDetailPage /> : <Navigate to="/dashboard/admin" replace />
-          } />
-          <Route path="/dashboard/users" element={
-            featureFlags.usersManagement ? <UsersDashboard /> : <Navigate to="/dashboard/admin" replace />
-          } />
-          
-          {/* Blog Admin routes */}
-          <Route path="/dashboard/admin/blog" element={
-            featureFlags.blogAdmin ? <BlogAdminDashboard /> : <Navigate to="/dashboard/admin" replace />
-          } />
-          <Route path="/dashboard/blog/create" element={
-            featureFlags.blogAdmin ? <BlogPostCreate /> : <Navigate to="/dashboard/admin" replace />
-          } />
-          <Route path="/dashboard/blog/edit/:postId" element={
-            featureFlags.blogAdmin ? <BlogPostEdit /> : <Navigate to="/dashboard/admin" replace />
-          } />
-          <Route path="/dashboard/blog/view/:postId" element={
-            featureFlags.blogAdmin ? <BlogPostView /> : <Navigate to="/dashboard/admin" replace />
-          } />
-        </Route>
-        
-        {/* Protected routes for recruiter users */}
-        <Route element={<ProtectedRoute allowedUserTypes={['recruiter']} />}>
-          <Route path="/dashboard/recruiter" element={
-            featureFlags.recruiterDashboard ? <RecruiterDashboard /> : <Navigate to="/" replace />
-          } />
-          <Route path="/dashboard/recruiter/jobs" element={
-            featureFlags.recruiterJobs ? <RecruiterJobs /> : <Navigate to="/dashboard/recruiter" replace />
-          } />
-          <Route path="/dashboard/recruiter/create-job-form" element={
-            featureFlags.dynamicJobForm ? <DynamicJobForm /> : <Navigate to="/dashboard/recruiter" replace />
-          } />
-          <Route path="/dashboard/recruiter/jobs/create" element={
-            featureFlags.multiStepJobCreation ? <CreateJobMultiStep /> : <Navigate to="/dashboard/recruiter/jobs" replace />
-          } />
-          <Route path="/dashboard/recruiter/candidates" element={
-            featureFlags.recruiterCandidates ? <RecruiterCandidates /> : <Navigate to="/dashboard/recruiter" replace />
-          } />
-          <Route path="/dashboard/recruiter/interviews" element={
-            featureFlags.recruiterInterviews ? <RecruiterInterviews /> : <Navigate to="/dashboard/recruiter" replace />
-          } />
-          <Route path="/dashboard/recruiter/applications" element={
-            featureFlags.recruiterApplications ? <RecruiterApplications /> : <Navigate to="/dashboard/recruiter" replace />
-          } />
-        </Route>
-        
-        {/* Protected routes for jobseeker users */}
-        <Route element={<ProtectedRoute allowedUserTypes={['jobseeker']} />}>
-          <Route path="/dashboard/jobseeker" element={<JobseekerDashboard />} />
-          {/* Add more jobseeker routes as needed */}
-        </Route>
-        
-        {/* Feature-flagged routes */}
+        {/* Admin Dashboard Routes */}
         <Route 
-          path="/refer-and-win" 
-          element={featureFlags.referAndWin ? <Layout><ReferAndWin /></Layout> : <Navigate to="/" replace />} 
+          path="/dashboard/admin" 
+          element={
+            <ProtectedRoute allowedUserTypes={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/admin/financial" 
+          element={
+            <ProtectedRoute allowedUserTypes={['admin']}>
+              <FinancialDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/admin/jobs" 
+          element={
+            <ProtectedRoute allowedUserTypes={['admin']}>
+              <JobsAdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/admin/jobs/:id" 
+          element={
+            <ProtectedRoute allowedUserTypes={['admin']}>
+              <JobDetailPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/admin/users" 
+          element={
+            <ProtectedRoute allowedUserTypes={['admin']}>
+              <UsersDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/admin/blog" 
+          element={
+            <ProtectedRoute allowedUserTypes={['admin']}>
+              <BlogAdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/admin/blog/create" 
+          element={
+            <ProtectedRoute allowedUserTypes={['admin']}>
+              <BlogPostCreate />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/admin/blog/edit/:id" 
+          element={
+            <ProtectedRoute allowedUserTypes={['admin']}>
+              <BlogPostEdit />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/admin/blog/view/:id" 
+          element={
+            <ProtectedRoute allowedUserTypes={['admin']}>
+              <BlogPostView />
+            </ProtectedRoute>
+          } 
         />
         
-        {/* Feedback feature - always enabled */}
-        <Route path="/feedback" element={<Layout><Feedback /></Layout>} />
-        
-        {/* Jobseeker Blog routes */}
+        {/* Recruiter Dashboard Routes */}
         <Route 
-          path="/jobseeker/blog" 
-          element={featureFlags.jobseekerBlog ? <JobseekerBlog /> : <Navigate to="/" replace />} 
+          path="/dashboard/recruiter" 
+          element={
+            <ProtectedRoute allowedUserTypes={['recruiter']}>
+              <RecruiterDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/recruiter/jobs" 
+          element={
+            <ProtectedRoute allowedUserTypes={['recruiter']}>
+              <RecruiterJobs />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/recruiter/jobs/create" 
+          element={
+            <ProtectedRoute allowedUserTypes={['recruiter']}>
+              <CreateJobMultiStep />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/recruiter/application-form/create" 
+          element={
+            <ProtectedRoute allowedUserTypes={['recruiter']}>
+              <CreateApplicationForm />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/recruiter/candidates" 
+          element={
+            <ProtectedRoute allowedUserTypes={['recruiter']}>
+              <RecruiterCandidates />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/recruiter/interviews" 
+          element={
+            <ProtectedRoute allowedUserTypes={['recruiter']}>
+              <RecruiterInterviews />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/recruiter/applications" 
+          element={
+            <ProtectedRoute allowedUserTypes={['recruiter']}>
+              <RecruiterApplications />
+            </ProtectedRoute>
+          } 
         />
         
+        {/* Jobseeker Dashboard Routes */}
         <Route 
-          path="/jobseeker/blog/:postId" 
-          element={featureFlags.jobseekerBlog ? <BlogPostView /> : <Navigate to="/" replace />} 
+          path="/dashboard/jobseeker" 
+          element={
+            <ProtectedRoute allowedUserTypes={['jobseeker']}>
+              <JobseekerDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/jobseeker/saved-jobs" 
+          element={
+            <ProtectedRoute allowedUserTypes={['jobseeker']}>
+              <JobseekerSavedJobs />
+            </ProtectedRoute>
+          } 
         />
         
-        {/* Catch-all route - redirect to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Blog Routes */}
+        <Route 
+          path="/dashboard/blog" 
+          element={
+            <ProtectedRoute allowedUserTypes={['admin', 'recruiter']}>
+              <BlogDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Catch-all route - redirect to Coming Soon */}
+        <Route path="*" element={<ComingSoon />} />
       </Routes>
     </Router>
     </div>

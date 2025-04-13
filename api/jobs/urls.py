@@ -8,6 +8,7 @@ router = DefaultRouter()
 router.register(r'jobs', JobViewSet)
 router.register(r'saved-jobs', SavedJobViewSet, basename='saved-jobs')
 
+
 urlpatterns = [
     path('', include(router.urls)),
 ]
