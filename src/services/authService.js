@@ -130,6 +130,11 @@ export const getCurrentUser = () => {
   }
 };
 
+// Get access token for API requests
+export const getToken = () => {
+  return localStorage.getItem('accessToken');
+};
+
 // Add this function to your existing authService.js
 
 // Register new user

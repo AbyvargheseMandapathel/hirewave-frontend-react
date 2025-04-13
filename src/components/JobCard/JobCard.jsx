@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaBriefcase } from 'react-icons/fa';
+import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaBriefcase, FaClock } from 'react-icons/fa';
 
 const JobCard = ({ job }) => {
   return (
@@ -30,6 +30,10 @@ const JobCard = ({ job }) => {
         <div className="flex items-center text-[#94a3b8]">
           <FaBriefcase className="mr-2" />
           {job.type}
+        </div>
+        <div className="flex items-center text-[#94a3b8]">
+          <FaClock className="mr-2" />
+          {job.posted_date}
         </div>
       </div>
     </Link>
