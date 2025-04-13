@@ -208,20 +208,33 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
             {/* Job Description */}
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">Job Description</h2>
-              <p className="text-[#94a3b8] leading-relaxed whitespace-pre-line">
-                {job.description}
-              </p>
+              <div 
+                className="text-[#94a3b8] leading-relaxed"
+                dangerouslySetInnerHTML={{ 
+                  __html: job.description 
+                }}
+              />
             </div>
 
-            {/* Requirements */}
-            {requirementsList.length > 0 && (
+                        {/* Requirements */}
+                        {requirementsList.length > 0 && (
               <div className="mb-8">
                 <h2 className="text-2xl font-semibold text-white mb-4">Requirements</h2>
-                <ul className="list-disc list-inside text-[#94a3b8] space-y-2">
+                <div className="text-[#94a3b8] space-y-2">
                   {requirementsList.map((req, index) => (
-                    <li key={index}>{req}</li>
+                    <div 
+                      key={index}
+                      className="flex items-start"
+                    >
+                      <span className="mr-2">•</span>
+                      <div
+                        dangerouslySetInnerHTML={{ 
+                          __html: req 
+                        }}
+                      />
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
 
