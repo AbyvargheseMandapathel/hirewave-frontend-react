@@ -1,22 +1,38 @@
 import React, { useEffect, useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaBriefcase, FaClock, FaExternalLinkAlt, FaBookmark, FaShare, FaSpinner } from 'react-icons/fa';
+import { 
+  FaBuilding, 
+  FaMapMarkerAlt, 
+  FaMoneyBillWave, 
+  FaBriefcase, 
+  FaClock, 
+  FaExternalLinkAlt, 
+  FaBookmark, 
+  FaShare, 
+  FaSpinner 
+} from 'react-icons/fa';
 import SimilarJobs from '../SimilarJobs/SimilarJobs';
-import AdCard from '../AdCard/AdCard';
 import ProtectedApplyButton from '../common/ProtectedApplyButton';
 import Button from '../common/Button';
 import { isLoggedIn } from '../../services/authService';
 import { getJobs } from '../../services/jobService';
 import { toggleBookmark } from '../../services/savedJobService';
 
-// Update the component props to include isSaved and setIsSaved
-const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrollable = true }) => {
+const JobDetails = ({ 
+  jobId, 
+  job,
+  loading,
+  error,
+  isSaved,
+  setIsSaved,
+  makeScrollable 
+}) => {
   const [similarJobs, setSimilarJobs] = useState([]);
   const [mainHeight, setMainHeight] = useState(0);
   const navigate = useNavigate();
   const mainContentRef = useRef(null);
   
-  // Update the main content height for the sidebar scrolling
   useEffect(() => {
     const updateHeight = () => {
       if (mainContentRef.current) {
@@ -26,11 +42,7 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
     
     updateHeight();
     
-    // Add a small delay to ensure content is fully rendered
-    const timer = setTimeout(() => {
-      updateHeight();
-    }, 100);
-    
+    const timer = setTimeout(updateHeight, 100);
     window.addEventListener('resize', updateHeight);
     
     return () => {
@@ -39,15 +51,11 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
     };
   }, [job]);
   
-  // Fetch similar jobs
   useEffect(() => {
     const fetchSimilarJobs = async () => {
       try {
         if (job) {
-          const filters = {
-            type: job.type,
-          };
-          
+          const filters = { type: job.type };
           const response = await getJobs(1, 3, filters);
           const filteredJobs = response.results.filter(j => j.id !== jobId);
           setSimilarJobs(filteredJobs);
@@ -57,12 +65,9 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
       }
     };
     
-    if (job) {
-      fetchSimilarJobs();
-    }
+    if (job) fetchSimilarJobs();
   }, [job, jobId]);
 
-  // Handle external application
   const handleExternalApply = () => {
     if (isLoggedIn()) {
       if (job?.external_link) {
@@ -73,7 +78,6 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
     }
   };
   
-  // Handle save job
   const handleSaveJob = async () => {
     if (!isLoggedIn()) {
       navigate(`/login?returnUrl=/job/${jobId}`);
@@ -135,22 +139,26 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
     );
   }
 
-  // Parse requirements
-  const requirementsList = typeof job.requirements === 'string' 
-    ? job.requirements.split('\n').filter(req => req.trim())
-    : Array.isArray(job.requirements) ? job.requirements : [];
+  const getRequirementsList = () => {
+    if (typeof job.requirements === 'string') {
+      return job.requirements.split('\n').filter(req => req.trim());
+    }
+    if (Array.isArray(job.requirements)) {
+      return job.requirements;
+    }
+    return [];
+  };
+  
+  const requirementsList = getRequirementsList();
 
   return (
     <div className="max-w-7xl mx-auto p-6 md:p-10">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
         <div className="lg:col-span-2">
           <div 
-            id="job-details-main" 
             ref={mainContentRef}
             className="bg-[#1e293b] rounded-xl p-8 shadow-2xl"
           >
-            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-start justify-between mb-8">
               <div className="mb-4 md:mb-0">
                 <h1 className="text-3xl font-bold text-white mb-2">{job.title}</h1>
@@ -168,6 +176,7 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
                   onClick={handleSaveJob}
                   className={`p-2 rounded-full ${isSaved ? 'bg-[#818cf8] text-white' : 'bg-[#334155] text-[#94a3b8]'} hover:bg-[#818cf8] hover:text-white transition-colors`}
                   title={isSaved ? "Unsave Job" : "Save Job"}
+                  aria-label={isSaved ? "Unsave Job" : "Save Job"}
                 >
                   <FaBookmark />
                 </button>
@@ -175,13 +184,13 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
                   onClick={handleShareJob}
                   className="p-2 rounded-full bg-[#334155] text-[#94a3b8] hover:bg-[#818cf8] hover:text-white transition-colors"
                   title="Share Job"
+                  aria-label="Share Job"
                 >
                   <FaShare />
                 </button>
               </div>
             </div>
 
-            {/* Details Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <DetailItem 
                 icon={<FaMapMarkerAlt className="text-[#818cf8] text-xl" />}
@@ -205,40 +214,31 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
               />
             </div>
 
-            {/* Job Description */}
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">Job Description</h2>
               <div 
                 className="text-[#94a3b8] leading-relaxed"
-                dangerouslySetInnerHTML={{ 
-                  __html: job.description 
-                }}
+                dangerouslySetInnerHTML={{ __html: job.description }}
               />
             </div>
 
-                        {/* Requirements */}
-                        {requirementsList.length > 0 && (
+            {requirementsList.length > 0 && (
               <div className="mb-8">
                 <h2 className="text-2xl font-semibold text-white mb-4">Requirements</h2>
                 <div className="text-[#94a3b8] space-y-2">
-                  {requirementsList.map((req, index) => (
-                    <div 
-                      key={index}
-                      className="flex items-start"
-                    >
-                      <span className="mr-2">•</span>
-                      <div
-                        dangerouslySetInnerHTML={{ 
-                          __html: req 
-                        }}
-                      />
-                    </div>
-                  ))}
+                {requirementsList.map((req) => {
+              const key = `req-${btoa(encodeURIComponent(req)).slice(0, 10)}`;
+                return (
+                  <div key={key} className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <div dangerouslySetInnerHTML={{ __html: req }} />
+                  </div>
+                );
+              })}
                 </div>
               </div>
             )}
 
-            {/* Apply Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               {job.external_link ? (
                 <Button
@@ -278,19 +278,15 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
           </div>
         </div>
 
-        {/* Sidebar - Updated with matching scrollbar styling */}
         <div className="lg:col-span-1">
           <div 
             className="space-y-6 bg-[#1e293b] rounded-xl p-6 shadow-2xl overflow-y-auto no-scrollbar" 
             style={{ 
               height: makeScrollable && mainHeight > 0 ? `${mainHeight}px` : 'auto',
               position: 'sticky',
-              top: '1.5rem',
-              scrollbarWidth: 'thin',
-              scrollbarColor: '#475569 #1e293b'
+              top: '1.5rem'
             }}
           >
-            {/* <AdCard /> */}
             {similarJobs.length > 0 && <SimilarJobs jobs={similarJobs} />}
           </div>
         </div>
@@ -299,7 +295,6 @@ const JobDetails = ({ jobId, job, loading, error, isSaved, setIsSaved, makeScrol
   );
 };
 
-// Reusable Detail Item Component
 const DetailItem = ({ icon, label, value }) => (
   <div className="flex items-center p-4 bg-[#0f172a] rounded-lg">
     <span className="mr-3">{icon}</span>
@@ -309,5 +304,46 @@ const DetailItem = ({ icon, label, value }) => (
     </div>
   </div>
 );
+
+JobDetails.propTypes = {
+  jobId: PropTypes.string,
+  job: PropTypes.shape({
+    id: PropTypes.string,
+    title: PropTypes.string,
+    company: PropTypes.string,
+    location: PropTypes.string,
+    salary: PropTypes.string,
+    type: PropTypes.string,
+    posted_date: PropTypes.string,
+    created_at: PropTypes.string,
+    description: PropTypes.string,
+    requirements: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.arrayOf(PropTypes.string)
+    ]),
+    external_link: PropTypes.string
+  }),
+  loading: PropTypes.bool,
+  error: PropTypes.string,
+  isSaved: PropTypes.bool,
+  setIsSaved: PropTypes.func,
+  makeScrollable: PropTypes.bool
+};
+
+JobDetails.defaultProps = {
+  jobId: '',
+  job: null,
+  loading: false,
+  error: null,
+  isSaved: false,
+  setIsSaved: () => {},
+  makeScrollable: true
+};
+
+DetailItem.propTypes = {
+  icon: PropTypes.node.isRequired,
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired
+};
 
 export default JobDetails;

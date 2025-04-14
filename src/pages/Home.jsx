@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import HeroHeading from '../components/HeroHeading/HeroHeading';
 import JobsGrid from '../components/JobsGrid/JobsGrid';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer/Footer';
 import { getJobs } from '../services/jobService';
 import { FaSpinner } from 'react-icons/fa';
+import JobsStatus from '../components/JobCard/JobsStatus'
 
 const Home = () => {
   const [jobs, setJobs] = useState([]);
@@ -93,18 +92,11 @@ const Home = () => {
                 </p>
               )}
             </div>
-          ) : !loading ? (
-            <div className="text-center text-[#94a3b8] my-12">
-              No jobs found
-            </div>
           ) : (
-            <div className="flex justify-center my-12">
-              <FaSpinner className="animate-spin text-[#818cf8] text-3xl" />
-            </div>
+            <JobsStatus jobs={jobs} loading={loading} />
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
