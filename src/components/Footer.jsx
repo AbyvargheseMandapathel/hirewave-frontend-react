@@ -39,18 +39,18 @@ const Footer = () => {
             <ul className="space-y-2">
               <li className="flex md:justify-center items-start">
                 <FaMapMarkerAlt className="mt-1 mr-2 min-w-[16px]" />
-                <span className="text-sm">123 Job Street, Talent City</span>
+                <span className="text-sm">Kerala , India</span>
               </li>
               <li className="flex md:justify-center items-center">
                 <FaEnvelope className="mr-2 min-w-[16px]" />
-                <a href="mailto:support@hirewave.com" className="text-sm hover:text-white">
-                  support@hirewave.com
+                <a href="mailto:hirewave.alerts@gmail.com" className="text-sm hover:text-white">
+                  hirewave.alerts@gmail.com
                 </a>
               </li>
               <li className="flex md:justify-center items-center">
                 <FaPhone className="mr-2 min-w-[16px]" />
-                <a href="tel:+11234567890" className="text-sm hover:text-white">
-                  +1 (123) 456-7890
+                <a href="tel:+917306255503" className="text-sm hover:text-white">
+                  +917306255503
                 </a>
               </li>
             </ul>
