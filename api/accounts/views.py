@@ -50,36 +50,55 @@ class RequestOTPView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# In your OTP verification view
 class VerifyOTPView(APIView):
-    permission_classes = [AllowAny]  # Add this line to allow unauthenticated access
+    permission_classes = [AllowAny]
     
     def post(self, request):
         serializer = OTPVerificationSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
-            
-            # When creating the response, include is_superuser in the user data
-            user_data = {
-                'id': user.id,
-                'email': user.email,
-                'user_type': user.user_type,
-                'is_superuser': user.is_superuser,  # Include the superuser flag
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                # Include any other user fields you need
-            }
-            
-            # Generate tokens
-            refresh = RefreshToken.for_user(user)
-            
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user': user_data
-            })
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user = serializer.validated_data['user']
+        referral_code = request.data.get('referralCode')
+
+        # Process referral code if provided
+        if referral_code and not user.referred_by:
+            try:
+                referring_user = User.objects.get(referral_code=referral_code)
+                
+                # Prevent self-referral
+                if referring_user == user:
+                    raise ValidationError("You cannot refer yourself")
+                
+                user.referred_by = referring_user
+                user.save()
+                
+            except User.DoesNotExist:
+                # Log invalid referral attempt but continue verification
+                logger.warning(f"Invalid referral code attempted: {referral_code}")
+
+        # Prepare user data response
+        user_data = {
+            'id': str(user.id),
+            'email': user.email,
+            'user_type': user.user_type,
+            'is_superuser': user.is_superuser,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'referral_code': user.referral_code,
+            'referred_by': str(user.referred_by.id) if user.referred_by else None
+        }
+
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
         
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Set final response
+        return Response({
+            'refresh': str(refresh),
+            'access': str(access_token),
+            'user': user_data
+        }, status=status.HTTP_200_OK)
 
 class ResendOTPView(APIView):
     permission_classes = [AllowAny]
@@ -133,19 +152,13 @@ class UserProfileView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-# Add this to your existing views.py file
-
-# Update the imports at the top of the file
-from .serializers import EmailSerializer, OTPVerificationSerializer, UserSerializer, UserRegistrationSerializer
-
-# The RegisterUserView should already be in your file, but make sure it's updated to handle any errors properly
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
+            # Create user - the serializer now handles the referral code
             user = serializer.save()
             
             # Generate OTP for immediate login
@@ -153,7 +166,7 @@ class RegisterUserView(APIView):
             
             # Send OTP via email
             subject = 'Welcome to HireWave - Verify Your Email'
-            message = f'Thank you for registering with HireWave!\n\nYour verification code is: {otp.code}\nThis code will expire in {settings.OTP_EXPIRY_MINUTES} minutes.'
+            message = f'Thank you for registering with HireWave!\n\nYour verification code is: {otp.code}\nThis code will expire in {settings.OTP_EXPIRY_MINUTES} minutes.\n\nYour referral code is: {user.referral_code}\nShare this with friends to invite them to HireWave!'
             from_email = settings.EMAIL_HOST_USER
             recipient_list = [user.email]
             
@@ -161,7 +174,8 @@ class RegisterUserView(APIView):
                 send_mail(subject, message, from_email, recipient_list)
                 return Response({
                     'message': 'Registration successful! Please check your email for verification code.',
-                    'email': user.email
+                    'email': user.email,
+                    'referralCode': user.referral_code
                 }, status=status.HTTP_201_CREATED)
             except Exception as e:
                 return Response({
@@ -171,11 +185,6 @@ class RegisterUserView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -192,7 +201,6 @@ class LogoutView(APIView):
                 return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
                 
             # Blacklist the refresh token
-            from rest_framework_simplejwt.tokens import RefreshToken
             token = RefreshToken(refresh_token)
             token.blacklist()
             

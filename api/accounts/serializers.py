@@ -44,76 +44,91 @@ class OTPVerificationSerializer(serializers.Serializer):
         data['user'] = user
         return data
 
-# Add this to your existing serializers.py file or update the existing UserRegistrationSerializer
-
-from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from .models import User, UserProfile
-
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
+    dob = serializers.DateField(required=False, allow_null=True)
+    college = serializers.CharField(required=False, allow_blank=True)
+    yearOfPassing = serializers.CharField(required=False, allow_blank=True)
+    status = serializers.CharField(required=False, allow_blank=True)
+    referralCode = serializers.CharField(required=False, allow_blank=True)
     firstName = serializers.CharField(source='first_name')
     lastName = serializers.CharField(source='last_name')
-    dob = serializers.DateField(required=False)
-    college = serializers.CharField(required=False)
-    yearOfPassing = serializers.CharField(required=False)
-    status = serializers.CharField(required=False)
-    referralCode = serializers.CharField(required=False)
-    
+
     class Meta:
         model = User
-        fields = ('email', 'firstName', 'lastName', 'password', 'confirm_password', 
-                 'dob', 'college', 'yearOfPassing', 'status', 'referralCode', 'user_type')
+        fields = [
+            'email', 'password', 'confirm_password', 'firstName', 'lastName',
+            'dob', 'college', 'yearOfPassing', 'status',
+            'referralCode', 'user_type'
+        ]
         extra_kwargs = {
-            'user_type': {'default': 'jobseeker'}
+            'password': {'write_only': True},
         }
-    
-    def validate(self, data):
-        if data['password'] != data.pop('confirm_password'):
-            raise serializers.ValidationError("Passwords do not match.")
-        return data
-    
-    def create(self, validated_data):
-        # Extract profile fields
-        profile_fields = {}
-        if 'dob' in validated_data:
-            profile_fields['dob'] = validated_data.pop('dob')
-        if 'college' in validated_data:
-            profile_fields['college'] = validated_data.pop('college')
-        if 'yearOfPassing' in validated_data:
-            profile_fields['year_of_passing'] = validated_data.pop('yearOfPassing')
-        if 'status' in validated_data:
-            profile_fields['status'] = validated_data.pop('status')
-        if 'referralCode' in validated_data:
-            profile_fields['referral_code'] = validated_data.pop('referralCode')
-        
-        # Create user
-        user = User.objects.create_user(
-            email=validated_data['email'],
-            password=validated_data['password'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            user_type=validated_data.get('user_type', 'jobseeker')
-        )
-        
-        # Create user profile with additional fields
-        if profile_fields:
-            UserProfile.objects.create(user=user, **profile_fields)
-            
-        return user
 
-# Update your existing UserSerializer to include profile fields
+    def validate(self, data):
+        # Password match check
+        if data.get('password') != data.get('confirm_password'):
+            raise serializers.ValidationError({'confirm_password': 'Passwords do not match'})
+
+        # Email uniqueness check
+        if User.objects.filter(email=data.get('email')).exists():
+            raise serializers.ValidationError({'email': 'User with this email already exists'})
+
+        return data
+
+    def create(self, validated_data):
+        # Extract fields not in User model
+        profile_fields = {
+            'dob': validated_data.pop('dob', None),
+            'college': validated_data.pop('college', ''),
+            'year_of_passing': validated_data.pop('yearOfPassing', ''),
+            'status': validated_data.pop('status', '')
+        }
+
+        validated_data.pop('confirm_password', None)
+        referral_code = validated_data.pop('referralCode', '').strip()
+        first_name = validated_data.pop('first_name', '')
+        last_name = validated_data.pop('last_name', '')
+
+        # Create the user
+        user = User.objects.create_user(
+            email=validated_data.pop('email'),
+            password=validated_data.pop('password'),
+            first_name=first_name,
+            last_name=last_name,
+            **validated_data
+        )
+
+        # Referral code logic
+        if referral_code and not user.referred_by:
+            try:
+                referring_user = User.objects.get(referral_code=referral_code)
+
+                # Prevent self-referral
+                if referring_user == user:
+                    raise ValidationError("You cannot refer yourself")
+
+                user.referred_by = referring_user
+                user.save()
+
+            except User.DoesNotExist:
+                pass  # Invalid referral code is ignored silently
+
+        # Create user profile
+        UserProfile.objects.create(user=user, **profile_fields)
+
+        return user
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['dob', 'college', 'year_of_passing', 'status', 'referral_code']
+        fields = ['dob', 'college', 'year_of_passing', 'status']
+        # Removed referral_code as it's not in the UserProfile model
 
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
     
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'user_type', 'date_joined', 'profile']
+        fields = ['id', 'email', 'first_name', 'last_name', 'user_type', 'date_joined', 'profile', 'referral_code', 'referred_by']
         read_only_fields = ['id', 'date_joined']

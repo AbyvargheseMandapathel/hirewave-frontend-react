@@ -5,6 +5,11 @@ import uuid
 import random
 import string
 
+def generate_unique_code(length=8):
+    """Generate a unique referral code"""
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choices(chars, k=length))
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -36,6 +41,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
+    referral_code = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    referred_by = models.ForeignKey('self', null=True, blank=True, related_name='referrals', on_delete=models.SET_NULL)
     
     objects = UserManager()
     
@@ -50,6 +57,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def get_short_name(self):
         return self.first_name or self.email.split('@')[0]
+    
+    def save(self, *args, **kwargs):
+        if not self.referral_code:
+            # Generate a unique referral code
+            while True:
+                code = generate_unique_code()
+                if not User.objects.filter(referral_code=code).exists():
+                    self.referral_code = code
+                    break
+        super().save(*args, **kwargs)
 
 class OTP(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otps')
@@ -71,15 +88,12 @@ class OTP(models.Model):
         
         return otp
 
-# Add this to your existing models.py file
-
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     dob = models.DateField(null=True, blank=True)
     college = models.CharField(max_length=100, blank=True)
     year_of_passing = models.CharField(max_length=4, blank=True)
     status = models.CharField(max_length=50, blank=True)
-    referral_code = models.CharField(max_length=20, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

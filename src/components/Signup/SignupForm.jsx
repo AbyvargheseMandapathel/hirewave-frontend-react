@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaLock, FaCalendar, FaGraduationCap, FaUserGraduate } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaCalendar, FaGraduationCap, FaUserGraduate, FaUserFriends } from 'react-icons/fa';
 import InputField from '../common/InputField';
 import Button from '../common/Button';
 import { registerUser } from '../../services/authService';
@@ -17,11 +17,13 @@ const SignupForm = () => {
     college: '',
     yearOfPassing: '',
     status: '',
-    referralCode: ''
+    referralCode: 'NEW' // Default referral code
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [formErrors, setFormErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,33 +31,130 @@ const SignupForm = () => {
       ...prevState,
       [name]: value
     }));
+    
+    // Clear error for this field when user starts typing
+    if (formErrors[name]) {
+      setFormErrors({
+        ...formErrors,
+        [name]: ''
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    
+    // Required fields validation
+    if (!formData.firstName.trim()) errors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) errors.lastName = 'Last name is required';
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email) {
+      errors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    // Password validation
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters';
+    }
+    
+    // Confirm password validation
+    if (formData.password !== formData.confirm_password) {
+      errors.confirm_password = 'Passwords do not match';
+    }
+    
+    return errors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     setError('');
     setSuccess('');
-    setIsLoading(true);
+    setIsSubmitting(true);
+    
+    // Validate form
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setFormErrors(validationErrors);
+      setIsLoading(false);
+      setIsSubmitting(false);
+      return;
+    }
     
     try {
-      const response = await registerUser(formData);
-      setSuccess(response.message);
-      // Redirect to login page with email pre-filled after 2 seconds
+      // Ensure referral code is 'NEW' if empty
+      const referralCode = formData.referralCode.trim() || 'NEW';
+      
+      // Format the data according to backend expectations
+      const userData = {
+        email: formData.email,
+        password: formData.password,
+        confirm_password: formData.confirm_password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        dob: formData.dob || null,
+        college: formData.college || '',
+        yearOfPassing: formData.yearOfPassing || '',
+        status: formData.status || '',
+        referralCode: referralCode,
+        user_type: 'jobseeker'
+      };
+      
+      // Call the registration service
+      const response = await registerUser(userData);
+      
+      // Show success message
+      setSuccess(response.message || 'Registration successful! Redirecting to verification...');
+      
+      // If successful, redirect to OTP verification page after a short delay
       setTimeout(() => {
-        navigate('/login', { state: { email: formData.email } });
-      }, 2000);
+        navigate('/verify-otp', { 
+          state: { 
+            email: formData.email,
+            isRegistration: true,
+            referralCode: referralCode, // Pass referral code to verification page
+            message: response.message || 'Please enter the verification code sent to your email'
+          } 
+        });
+      }, 1500);
     } catch (err) {
-      if (err.email) {
-        setError(`Email error: ${err.email[0]}`);
-      } else if (err.password) {
-        setError(`Password error: ${err.password[0]}`);
-      } else if (err.non_field_errors) {
-        setError(err.non_field_errors[0]);
+      console.error('Registration error:', err);
+      
+      // Handle backend validation errors
+      if (err && typeof err === 'object') {
+        // Check for specific field errors
+        const fieldErrors = {};
+        let hasFieldErrors = false;
+        
+        for (const field of ['email', 'password', 'firstName', 'lastName', 'confirm_password', 'referralCode']) {
+          if (err[field]) {
+            fieldErrors[field] = Array.isArray(err[field]) ? err[field][0] : err[field];
+            hasFieldErrors = true;
+          }
+        }
+        
+        if (hasFieldErrors) {
+          setFormErrors(fieldErrors);
+          setError('Please correct the errors below');
+        } else if (err.error) {
+          setError(err.error);
+        } else if (err.detail) {
+          setError(err.detail);
+        } else {
+          setError('Registration failed. Please try again.');
+        }
       } else {
-        setError(err.error || 'Registration failed. Please try again.');
+        setError('An unexpected error occurred. Please try again.');
       }
     } finally {
       setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -92,6 +191,7 @@ const SignupForm = () => {
             icon={<FaUser className="text-[#94a3b8]" />}
             label="First Name"
             required
+            error={formErrors.firstName}
           />
           
           <InputField
@@ -104,6 +204,7 @@ const SignupForm = () => {
             icon={<FaUser className="text-[#94a3b8]" />}
             label="Last Name"
             required
+            error={formErrors.lastName}
           />
         </div>
         
@@ -117,6 +218,7 @@ const SignupForm = () => {
           icon={<FaEnvelope className="text-[#94a3b8]" />}
           label="Email Address"
           required
+          error={formErrors.email}
         />
         
         <InputField
@@ -129,6 +231,7 @@ const SignupForm = () => {
           icon={<FaLock className="text-[#94a3b8]" />}
           label="Password"
           required
+          error={formErrors.password}
         />
         
         <InputField
@@ -141,6 +244,7 @@ const SignupForm = () => {
           icon={<FaLock className="text-[#94a3b8]" />}
           label="Confirm Password"
           required
+          error={formErrors.confirm_password}
         />
         
         <InputField
@@ -152,6 +256,7 @@ const SignupForm = () => {
           placeholder="Date of Birth"
           icon={<FaCalendar className="text-[#94a3b8]" />}
           label="Date of Birth"
+          error={formErrors.dob}
         />
         
         <InputField
@@ -163,6 +268,7 @@ const SignupForm = () => {
           placeholder="College/University"
           icon={<FaGraduationCap className="text-[#94a3b8]" />}
           label="College/University"
+          error={formErrors.college}
         />
         
         <InputField
@@ -174,6 +280,7 @@ const SignupForm = () => {
           placeholder="Year of Passing"
           icon={<FaUserGraduate className="text-[#94a3b8]" />}
           label="Year of Passing"
+          error={formErrors.yearOfPassing}
         />
         
         <InputField
@@ -185,6 +292,7 @@ const SignupForm = () => {
           placeholder="Current Status"
           icon={<FaUser className="text-[#94a3b8]" />}
           label="Current Status"
+          error={formErrors.status}
         />
         
         <InputField
@@ -193,15 +301,17 @@ const SignupForm = () => {
           type="text"
           value={formData.referralCode}
           onChange={handleChange}
-          placeholder="Referral Code (Optional)"
-          icon={<FaUser className="text-[#94a3b8]" />}
+          placeholder="Referral Code "
+          icon={<FaUserFriends className="text-[#94a3b8]" />}
           label="Referral Code"
+          error={formErrors.referralCode}
+          helperText="Enter a referral code"
         />
         
         <Button
           type="submit"
           className="w-full"
-          disabled={isLoading}
+          disabled={isLoading || isSubmitting}
         >
           {isLoading ? "Creating Account..." : "Sign Up"}
         </Button>

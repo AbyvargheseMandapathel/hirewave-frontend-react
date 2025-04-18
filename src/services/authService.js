@@ -2,89 +2,203 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8000/api/auth/';
 
-// Request OTP for login
+/**
+ * Helper function to clear all auth storage
+ */
+const clearAuthStorage = () => {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('accessToken');
+  delete axios.defaults.headers.common['Authorization'];
+};
+
+/**
+ * Store authentication data consistently
+ * @param {Object} data - Response data containing tokens and user info
+ */
+const storeAuthData = (data) => {
+  // Store tokens
+  if (data.access) {
+    localStorage.setItem('accessToken', data.access);
+    localStorage.setItem('token', data.access); // For compatibility
+    localStorage.setItem('refreshToken', data.refresh);
+  } else if (data.token) {
+    localStorage.setItem('accessToken', data.token);
+    localStorage.setItem('token', data.token);
+    if (data.refresh) {
+      localStorage.setItem('refreshToken', data.refresh);
+    }
+  }
+  
+  // Set token in axios default headers
+  const authToken = data.access || data.token;
+  if (authToken) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+  }
+  
+  // Store user data
+  if (data.user) {
+    localStorage.setItem('user', JSON.stringify(data.user));
+  }
+};
+
+/**
+ * Request OTP for login
+ * @param {string} email - User's email
+ * @returns {Promise} - Response from the API
+ */
 export const requestOTP = async (email) => {
   try {
     const response = await axios.post(API_URL + 'request-otp/', { email });
     return response.data;
   } catch (error) {
-    throw error.response?.data || { error: 'Network error' };
+    console.error('Request OTP error:', error);
+    throw error.response?.data || { error: 'Failed to request OTP. Please try again.' };
   }
 };
 
-// Verify OTP and get tokens
-export const verifyOTP = async (email, otp) => {
+/**
+ * Verify OTP and get tokens
+ * @param {string} email - User's email
+ * @param {string|Array} otp - OTP code (array or string)
+ * @param {string} referralCode - Optional referral code
+ * @returns {Promise} - Response from the API with tokens and user data
+ */
+export const verifyOTP = async (email, otp, referralCode = null) => {
   try {
-    // Make sure otp is an array before joining
+    // Make sure otp is a string
     const otpString = Array.isArray(otp) ? otp.join('') : otp;
     
-    console.log('Sending OTP to backend:', { email, otp: otpString });
-    
-    const response = await axios.post(API_URL + 'verify-otp/', { 
+    const requestData = { 
       email, 
       otp: otpString 
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
+    };
     
-    console.log('Login response:', response.data);
-    
-    // Store tokens consistently in localStorage with both naming conventions
-    if (response.data.access) {
-      localStorage.setItem('accessToken', response.data.access);
-      localStorage.setItem('token', response.data.access); // Add both keys for compatibility
-      localStorage.setItem('refreshToken', response.data.refresh);
-    } else if (response.data.token) {
-      localStorage.setItem('accessToken', response.data.token);
-      localStorage.setItem('token', response.data.token);
-      if (response.data.refresh) {
-        localStorage.setItem('refreshToken', response.data.refresh);
-      }
+    // Add referral code if provided
+    if (referralCode) {
+      requestData.referralCode = referralCode;
     }
     
-    // Set token in axios default headers
-    const authToken = response.data.access || response.data.token;
-    if (authToken) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-    }
+    const response = await axios.post(API_URL + 'verify-otp/', requestData);
     
-    // Make sure user data is complete
-    const userData = response.data.user;
-    console.log('User data to store:', userData);
-    
-    // Store the complete user object
-    localStorage.setItem('user', JSON.stringify(userData));
+    // Store auth data
+    storeAuthData(response.data);
     
     return response.data;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Verify OTP error:', error);
     if (error.response && error.response.data) {
       throw error.response.data;
-    } else if (error.error) {
-      throw error;
     } else {
-      throw { error: 'Network error or server not responding' };
+      throw { error: 'Invalid OTP or verification failed. Please try again.' };
     }
   }
 };
 
-// Resend OTP
+/**
+ * Resend OTP
+ * @param {string} email - User's email
+ * @returns {Promise} - Response from the API
+ */
 export const resendOTP = async (email) => {
   try {
     const response = await axios.post(API_URL + 'resend-otp/', { email });
     return response.data;
   } catch (error) {
-    throw error.response?.data || { error: 'Network error' };
+    console.error('Resend OTP error:', error);
+    throw error.response?.data || { error: 'Failed to resend OTP. Please try again.' };
   }
 };
 
-// Get user profile
+/**
+ * Register a new user
+ * @param {Object} userData - User registration data
+ * @returns {Promise} - Response from the API
+ */
+export const registerUser = async (userData) => {
+  try {
+    // Ensure referral code is 'NEW' if empty
+    if (!userData.referralCode || userData.referralCode.trim() === '') {
+      userData.referralCode = 'NEW';
+    }
+    
+    const response = await axios.post(API_URL + 'register/', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Registration error:', error);
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    } else {
+      throw { error: 'Registration failed. Please try again.' };
+    }
+  }
+};
+
+/**
+ * Verify email after registration
+ * @param {Object} data - Contains email and OTP code
+ * @param {string} referralCode - Optional referral code
+ * @returns {Promise} - Response from the API with tokens and user data
+ */
+export const verifyRegistration = async (data, referralCode = null) => {
+  try {
+    // Add referral code if provided
+    if (referralCode) {
+      data.referralCode = referralCode;
+    }
+    
+    const response = await axios.post(API_URL + 'verify-otp/', data);
+    
+    // Store auth data
+    storeAuthData(response.data);
+    
+    return response.data;
+  } catch (error) {
+    console.error('Verification error:', error);
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    } else {
+      throw { error: 'Verification failed. Please try again.' };
+    }
+  }
+};
+
+/**
+ * Login with credentials
+ * @param {Object} credentials - User credentials
+ * @returns {Promise} - Response with success status and user data
+ */
+export const login = async (credentials) => {
+  try {
+    const response = await axios.post(API_URL + 'login/', credentials);
+    
+    // Store auth data
+    storeAuthData(response.data);
+    
+    return { success: true, user: response.data.user };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { 
+      success: false, 
+      message: error.response?.data?.detail || 'Login failed. Please try again.' 
+    };
+  }
+};
+
+/**
+ * Get user profile
+ * @returns {Promise} - Response with user profile data
+ */
 export const getUserProfile = async () => {
   try {
-    // Try both token formats
-    const authToken = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    const authToken = getToken();
+    
+    if (!authToken) {
+      throw { error: 'Not authenticated' };
+    }
     
     const response = await axios.get(API_URL + 'profile/', {
       headers: {
@@ -93,25 +207,27 @@ export const getUserProfile = async () => {
     });
     return response.data;
   } catch (error) {
-    throw error.response?.data || { error: 'Network error' };
+    console.error('Get profile error:', error);
+    throw error.response?.data || { error: 'Failed to fetch user profile.' };
   }
 };
 
-// Logout
+/**
+ * Logout user
+ * @returns {Promise<boolean>} - Success status
+ */
 export const logout = async () => {
   try {
     const refreshToken = localStorage.getItem('refreshToken');
-    // Try both token formats
-    const authToken = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    const authToken = getToken();
     
     if (!refreshToken && !authToken) {
-      // If no tokens, just clear local storage
       clearAuthStorage();
-      return;
+      return true;
     }
     
     // Call the logout API
-    const response = await axios.post(`${API_URL}logout/`, 
+    await axios.post(`${API_URL}logout/`, 
       { refresh: refreshToken },
       {
         headers: {
@@ -121,51 +237,34 @@ export const logout = async () => {
       }
     );
     
-    // Clear local storage regardless of API response
     clearAuthStorage();
-    
     return true;
   } catch (error) {
     console.error('Logout error:', error);
-    // Still clear local storage even if API call fails
     clearAuthStorage();
     return false;
   }
 };
 
-// Helper function to clear all auth storage
-const clearAuthStorage = () => {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('token');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('user');
-  // Also clear from sessionStorage if used
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('accessToken');
-  // Remove default auth header
-  delete axios.defaults.headers.common['Authorization'];
-};
-
-// Check if user is logged in
+/**
+ * Check if user is logged in
+ * @returns {boolean} - Login status
+ */
 export const isLoggedIn = () => {
-  // Try both token formats
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  const token = getToken();
   const user = localStorage.getItem('user');
-  
-  console.log('isLoggedIn check:', { hasToken: !!token, hasUser: !!user });
   
   if (!token || !user) {
     return false;
   }
   
-  // Optional: Check if token is expired
+  // Check if token is expired
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const isExpired = payload.exp < Date.now() / 1000;
-    console.log('Token expiration check:', { exp: payload.exp, now: Date.now() / 1000, isExpired });
     
     if (isExpired) {
-      // Token is expired
+      clearAuthStorage();
       return false;
     }
   } catch (e) {
@@ -176,66 +275,47 @@ export const isLoggedIn = () => {
   return true;
 };
 
-// Get current user
+/**
+ * Get current user
+ * @returns {Object|null} - User data or null
+ */
 export const getCurrentUser = () => {
   try {
     const user = localStorage.getItem('user');
-    const parsedUser = user ? JSON.parse(user) : null;
-    console.log('getCurrentUser:', parsedUser);
-    return parsedUser;
+    return user ? JSON.parse(user) : null;
   } catch (e) {
     console.error('Error getting current user:', e);
     return null;
   }
 };
 
-// Get access token for API requests
+/**
+ * Get access token for API requests
+ * @returns {string|null} - Access token or null
+ */
 export const getToken = () => {
   return localStorage.getItem('accessToken') || localStorage.getItem('token');
 };
 
-// Add this function to get the authorization header
+/**
+ * Get authorization header for API requests
+ * @returns {Object} - Header object with Authorization
+ */
 export const getAuthHeader = () => {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// Register new user
-export const registerUser = async (userData) => {
+/**
+ * Get user's referral code
+ * @returns {string|null} - User's referral code or null
+ */
+export const getUserReferralCode = () => {
   try {
-    const response = await axios.post(API_URL + 'register/', userData);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { error: 'Network error' };
+    const user = getCurrentUser();
+    return user?.referral_code || null;
+  } catch (e) {
+    console.error('Error getting referral code:', e);
+    return null;
   }
-};
-
-// Make sure your login function properly stores the token
-export const login = async (credentials) => {
-    try {
-        const response = await axios.post(API_URL + 'login/', credentials);
-        
-        // Store token in localStorage with both naming conventions
-        if (response.data.token) {
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('accessToken', response.data.token);
-            console.log("Token saved:", response.data.token);
-            
-            // Set the token in axios headers for future requests
-            axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-        }
-        
-        // Store user data if available
-        if (response.data.user) {
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-        }
-        
-        return { success: true, user: response.data.user };
-    } catch (error) {
-        console.error('Login error:', error);
-        return { 
-            success: false, 
-            message: error.response?.data?.detail || 'Login failed. Please try again.' 
-        };
-    }
 };
