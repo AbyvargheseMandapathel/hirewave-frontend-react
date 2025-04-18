@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import os
+from pathlib import Path\
 
-from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,8 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-hlt8i(9p85-=2zp9h0vx-rd1(c-q6rk@no3vaz@1o^z%m^9r7*'
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -139,9 +142,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-your-secret-key-here'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev', 'localhost', '127.0.0.1']
 
 # Application definition
 # Add these to your INSTALLED_APPS
@@ -198,12 +201,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'hirewave.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -265,8 +268,8 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'edxfr3q@gmail.com'
-EMAIL_HOST_PASSWORD = 'mkzdmckbuujxvemm'
+EMAIL_HOST_USER = 'hirewave.alerts@gmail.com'
+EMAIL_HOST_PASSWORD = 'cmkn mvgm bvgy rvpw'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # OTP settings
@@ -286,3 +289,52 @@ CKEDITOR_CONFIGS = {
 
 # Add CORS headers to allow your frontend to access the API
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
+
+# Add this to your settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'u911622560_Hirewave',
+        'USER': 'u911622560_hirewave_admin',
+        'PASSWORD': '6L]kRxIpzgc/3A9q8^U=',
+        'HOST': 'darkgoldenrod-raccoon-867741.hostingersite.com',  # Updated hostname - check with your hosting provider
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4',
+        }
+    }
+}
+
+# Security settings for production
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+
+CORS_ALLOWED_ORIGINS = [
+    "https://hirewave.online"
+]
+CORS_ALLOW_ALL_ORIGINS = False 
+

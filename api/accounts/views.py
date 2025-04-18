@@ -8,6 +8,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .serializers import EmailSerializer, OTPVerificationSerializer, UserSerializer, UserRegistrationSerializer
 from .models import OTP
+from django.core.cache import cache
+from rest_framework.exceptions import Throttled
 
 User = get_user_model()
 
@@ -18,6 +20,16 @@ class RequestOTPView(APIView):
         serializer = EmailSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
+            
+            # Rate limiting
+            cache_key = f"otp_request_{email}"
+            request_count = cache.get(cache_key, 0)
+            
+            if request_count >= 5:  # Max 5 requests per hour
+                raise Throttled(detail="Too many OTP requests. Please try again later.")
+            
+            # Increment counter with 1-hour expiry
+            cache.set(cache_key, request_count + 1, 3600)
             
             # Check if user exists instead of get_or_create
             try:
@@ -58,9 +70,15 @@ class VerifyOTPView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        # In your OTPVerificationView post method, after validating OTP
         user = serializer.validated_data['user']
         referral_code = request.data.get('referralCode')
-
+        
+        # Mark email as verified if not already
+        if not user.is_email_verified:
+            user.is_email_verified = True
+            user.save(update_fields=['is_email_verified'])
+        
         # Process referral code if provided
         if referral_code and not user.referred_by:
             try:
@@ -71,7 +89,7 @@ class VerifyOTPView(APIView):
                     raise ValidationError("You cannot refer yourself")
                 
                 user.referred_by = referring_user
-                user.save()
+                user.save(update_fields=['referred_by'])
                 
             except User.DoesNotExist:
                 # Log invalid referral attempt but continue verification

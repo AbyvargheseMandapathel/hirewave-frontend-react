@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api/auth/';
+// Use environment variable for API URL with fallback
+const API_URL = import.meta.env.VITE_AUTH_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/';
 
 /**
  * Helper function to clear all auth storage
@@ -20,30 +21,65 @@ const clearAuthStorage = () => {
  * @param {Object} data - Response data containing tokens and user info
  */
 const storeAuthData = (data) => {
-  // Store tokens
-  if (data.access) {
-    localStorage.setItem('accessToken', data.access);
-    localStorage.setItem('token', data.access); // For compatibility
-    localStorage.setItem('refreshToken', data.refresh);
-  } else if (data.token) {
-    localStorage.setItem('accessToken', data.token);
-    localStorage.setItem('token', data.token);
-    if (data.refresh) {
+  try {
+    // Store tokens
+    if (data.access) {
+      localStorage.setItem('accessToken', data.access);
+      localStorage.setItem('token', data.access); // For compatibility
       localStorage.setItem('refreshToken', data.refresh);
+    } else if (data.token) {
+      localStorage.setItem('accessToken', data.token);
+      localStorage.setItem('token', data.token);
+      if (data.refresh) {
+        localStorage.setItem('refreshToken', data.refresh);
+      }
     }
-  }
-  
-  // Set token in axios default headers
-  const authToken = data.access || data.token;
-  if (authToken) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-  }
-  
-  // Store user data
-  if (data.user) {
-    localStorage.setItem('user', JSON.stringify(data.user));
+    
+    // Set token in axios default headers
+    const authToken = data.access || data.token;
+    if (authToken) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+    }
+    
+    // Store user data
+    if (data.user) {
+      localStorage.setItem('user', JSON.stringify(data.user));
+    }
+  } catch (error) {
+    console.error('Error storing auth data:', error);
+    // Clear any partial data that might have been stored
+    clearAuthStorage();
+    throw new Error('Failed to store authentication data');
   }
 };
+
+/**
+ * Create a configured axios instance for auth requests
+ */
+const authApi = axios.create({
+  baseURL: API_URL,
+  timeout: 10000, // 10 seconds timeout
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
+// Add response interceptor for consistent error handling
+authApi.interceptors.response.use(
+  response => response,
+  error => {
+    console.error('Auth API Error:', error);
+    
+    // Format error response consistently
+    const errorResponse = {
+      status: error.response?.status || 500,
+      message: error.response?.data?.detail || error.response?.data?.error || error.message || 'Unknown error occurred',
+      errors: error.response?.data?.errors || {}
+    };
+    
+    return Promise.reject(errorResponse);
+  }
+);
 
 /**
  * Request OTP for login
@@ -52,11 +88,11 @@ const storeAuthData = (data) => {
  */
 export const requestOTP = async (email) => {
   try {
-    const response = await axios.post(API_URL + 'request-otp/', { email });
+    const response = await authApi.post('request-otp/', { email });
     return response.data;
   } catch (error) {
     console.error('Request OTP error:', error);
-    throw error.response?.data || { error: 'Failed to request OTP. Please try again.' };
+    throw error.message ? error : { error: 'Failed to request OTP. Please try again.' };
   }
 };
 
@@ -82,7 +118,7 @@ export const verifyOTP = async (email, otp, referralCode = null) => {
       requestData.referralCode = referralCode;
     }
     
-    const response = await axios.post(API_URL + 'verify-otp/', requestData);
+    const response = await authApi.post('verify-otp/', requestData);
     
     // Store auth data
     storeAuthData(response.data);
@@ -90,11 +126,7 @@ export const verifyOTP = async (email, otp, referralCode = null) => {
     return response.data;
   } catch (error) {
     console.error('Verify OTP error:', error);
-    if (error.response && error.response.data) {
-      throw error.response.data;
-    } else {
-      throw { error: 'Invalid OTP or verification failed. Please try again.' };
-    }
+    throw error.message ? error : { error: 'Invalid OTP or verification failed. Please try again.' };
   }
 };
 
@@ -105,11 +137,11 @@ export const verifyOTP = async (email, otp, referralCode = null) => {
  */
 export const resendOTP = async (email) => {
   try {
-    const response = await axios.post(API_URL + 'resend-otp/', { email });
+    const response = await authApi.post('resend-otp/', { email });
     return response.data;
   } catch (error) {
     console.error('Resend OTP error:', error);
-    throw error.response?.data || { error: 'Failed to resend OTP. Please try again.' };
+    throw error.message ? error : { error: 'Failed to resend OTP. Please try again.' };
   }
 };
 
@@ -125,15 +157,11 @@ export const registerUser = async (userData) => {
       userData.referralCode = 'NEW';
     }
     
-    const response = await axios.post(API_URL + 'register/', userData);
+    const response = await authApi.post('register/', userData);
     return response.data;
   } catch (error) {
     console.error('Registration error:', error);
-    if (error.response && error.response.data) {
-      throw error.response.data;
-    } else {
-      throw { error: 'Registration failed. Please try again.' };
-    }
+    throw error.message ? error : { error: 'Registration failed. Please try again.' };
   }
 };
 
@@ -150,7 +178,7 @@ export const verifyRegistration = async (data, referralCode = null) => {
       data.referralCode = referralCode;
     }
     
-    const response = await axios.post(API_URL + 'verify-otp/', data);
+    const response = await authApi.post('verify-otp/', data);
     
     // Store auth data
     storeAuthData(response.data);
@@ -158,32 +186,31 @@ export const verifyRegistration = async (data, referralCode = null) => {
     return response.data;
   } catch (error) {
     console.error('Verification error:', error);
-    if (error.response && error.response.data) {
-      throw error.response.data;
-    } else {
-      throw { error: 'Verification failed. Please try again.' };
-    }
+    throw error.message ? error : { error: 'Verification failed. Please try again.' };
   }
 };
 
 /**
- * Login with credentials
+ * Login with credentials - Using OTP flow since direct login endpoint doesn't exist
  * @param {Object} credentials - User credentials
  * @returns {Promise} - Response with success status and user data
  */
 export const login = async (credentials) => {
   try {
-    const response = await axios.post(API_URL + 'login/', credentials);
+    // Use the OTP flow instead of direct login
+    await requestOTP(credentials.email);
     
-    // Store auth data
-    storeAuthData(response.data);
-    
-    return { success: true, user: response.data.user };
+    return { 
+      success: true, 
+      message: 'OTP sent successfully. Please check your email for verification code.',
+      email: credentials.email,
+      requiresOTP: true
+    };
   } catch (error) {
     console.error('Login error:', error);
     return { 
       success: false, 
-      message: error.response?.data?.detail || 'Login failed. Please try again.' 
+      message: error.message || 'Login failed. Please try again.' 
     };
   }
 };
@@ -200,7 +227,7 @@ export const getUserProfile = async () => {
       throw { error: 'Not authenticated' };
     }
     
-    const response = await axios.get(API_URL + 'profile/', {
+    const response = await authApi.get('profile/', {
       headers: {
         Authorization: `Bearer ${authToken}`
       }
@@ -208,7 +235,7 @@ export const getUserProfile = async () => {
     return response.data;
   } catch (error) {
     console.error('Get profile error:', error);
-    throw error.response?.data || { error: 'Failed to fetch user profile.' };
+    throw error.message ? error : { error: 'Failed to fetch user profile.' };
   }
 };
 
@@ -227,7 +254,7 @@ export const logout = async () => {
     }
     
     // Call the logout API
-    await axios.post(`${API_URL}logout/`, 
+    await authApi.post('logout/', 
       { refresh: refreshToken },
       {
         headers: {
@@ -241,6 +268,7 @@ export const logout = async () => {
     return true;
   } catch (error) {
     console.error('Logout error:', error);
+    // Even if the API call fails, clear local storage
     clearAuthStorage();
     return false;
   }
@@ -269,6 +297,7 @@ export const isLoggedIn = () => {
     }
   } catch (e) {
     console.error('Error parsing token:', e);
+    clearAuthStorage();
     return false;
   }
   
@@ -317,5 +346,34 @@ export const getUserReferralCode = () => {
   } catch (e) {
     console.error('Error getting referral code:', e);
     return null;
+  }
+};
+
+/**
+ * Refresh the access token using the refresh token
+ * @returns {Promise<boolean>} - Success status
+ */
+export const refreshAccessToken = async () => {
+  try {
+    const refreshToken = localStorage.getItem('refreshToken');
+    
+    if (!refreshToken) {
+      return false;
+    }
+    
+    const response = await authApi.post('token/refresh/', { refresh: refreshToken });
+    
+    if (response.data.access) {
+      localStorage.setItem('accessToken', response.data.access);
+      localStorage.setItem('token', response.data.access);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`;
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    clearAuthStorage();
+    return false;
   }
 };

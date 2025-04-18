@@ -33,8 +33,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('admin', 'Admin'),
     )
     
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField(unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+    email = models.EmailField(unique=True,db_index=True)
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='jobseeker')
@@ -43,7 +43,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
     referral_code = models.CharField(max_length=20, unique=True, null=True, blank=True)
     referred_by = models.ForeignKey('self', null=True, blank=True, related_name='referrals', on_delete=models.SET_NULL)
-    
+    is_email_verified = models.BooleanField(default=False)
+
     objects = UserManager()
     
     USERNAME_FIELD = 'email'

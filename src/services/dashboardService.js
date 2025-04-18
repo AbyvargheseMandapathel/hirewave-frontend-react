@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getAuthHeader } from './authService';
 import { getSavedJobs } from './savedJobService';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
 
 // Create a configured axios instance
 const apiClient = axios.create({

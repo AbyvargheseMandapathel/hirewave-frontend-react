@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           
           // Fetch user data
-          const response = await axios.get('http://localhost:8000/api/users/me/');
+          const response = await axios.get('https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/users/me/');
           setUser(response.data);
           setIsAuthenticated(true);
           console.log("User authenticated:", response.data);
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       // Fetch user data
-      const response = await axios.get('http://localhost:8000/api/users/me/');
+      const response = await axios.get('https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/users/me/');
       setUser(response.data);
       setIsAuthenticated(true);
       return true;
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (credentials) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/login/', credentials);
+      const response = await axios.post('https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/login/', credentials);
       const { token, user } = response.data;
       
       // Use the imported storeToken from tokenUtils
