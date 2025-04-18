@@ -217,7 +217,7 @@ const JobDetails = ({
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">Job Description</h2>
               <div 
-                className="text-[#94a3b8] leading-relaxed"
+                className="text-[#ffffff] leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: job.description }}
               />
             </div>
@@ -225,7 +225,7 @@ const JobDetails = ({
             {requirementsList.length > 0 && (
               <div className="mb-8">
                 <h2 className="text-2xl font-semibold text-white mb-4">Requirements</h2>
-                <div className="text-[#94a3b8] space-y-2">
+                <div className="text-[#ffffff] space-y-2">
                 {requirementsList.map((req) => {
               const key = `req-${btoa(encodeURIComponent(req)).slice(0, 10)}`;
                 return (
