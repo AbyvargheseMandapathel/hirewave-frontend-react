@@ -11,10 +11,10 @@
 
 # Set NODE_ENV only before build, not during install
 [context.production.environment]
-  NODE_ENV = "production"
+  NODE_ENV = "development"
 
 [context.deploy-preview.environment]
-  NODE_ENV = "production"
+  NODE_ENV = "development"
 
 [[headers]]
   for = "/*"
