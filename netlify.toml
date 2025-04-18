@@ -1,6 +1,6 @@
 [build]
   # Split install and build so NODE_ENV isn't set too early
-  command = "npm config set legacy-peer-deps true && npm install && npm run build"
+  command = "npm config set legacy-peer-deps true && npm install --force && npm run build"
   publish = "build"
   functions = "netlify/functions"
 
