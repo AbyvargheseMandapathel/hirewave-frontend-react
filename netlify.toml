@@ -1,0 +1,42 @@
+# Netlify configuration file for HireWave Frontend
+
+[build]
+  # Directory to publish (relative to root of your repo)
+  publish = "build"
+  # Default build command
+  command = "npm install --legacy-peer-deps && npm run build"
+
+# Redirects and rewrites
+[[redirects]]
+  # Redirect all routes to index.html for SPA routing
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Environment variable settings
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "production"
+
+# Headers to set on specific paths
+[[headers]]
+  # Define headers for all files
+  for = "/*"
+    [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer-when-downgrade"
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+
+# Cache control for static assets
+[[headers]]
+  for = "/assets/*"
+    [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Plugin settings
+[build.processing]
+  skip_processing = false
