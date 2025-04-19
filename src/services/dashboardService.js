@@ -51,7 +51,7 @@ export const adminDashboardService = {
 
   getJobsStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/admin/job-stats/');
+      const { data } = await apiClient.get('/auth/dashboard/admin/stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch job stats:', error);
