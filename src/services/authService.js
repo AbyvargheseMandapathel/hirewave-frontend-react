@@ -91,8 +91,12 @@ export const requestOTP = async (email) => {
     const response = await authApi.post('request-otp/', { email });
     return response.data;
   } catch (error) {
-    console.error('Request OTP error:', error);
-    throw error.message ? error : { error: 'Failed to request OTP. Please try again.' };
+    const errorData = {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || error.message || 'Network Error',
+      errors: error.response?.data?.errors || {}
+    };
+    throw errorData;
   }
 };
 
@@ -103,30 +107,18 @@ export const requestOTP = async (email) => {
  * @param {string} referralCode - Optional referral code
  * @returns {Promise} - Response from the API with tokens and user data
  */
-export const verifyOTP = async (email, otp, referralCode = null) => {
+export const verifyOTP = async (email, otp, referralCode) => {
   try {
-    // Make sure otp is a string
-    const otpString = Array.isArray(otp) ? otp.join('') : otp;
-    
-    const requestData = { 
-      email, 
-      otp: otpString 
-    };
-    
-    // Add referral code if provided
-    if (referralCode) {
-      requestData.referralCode = referralCode;
+    const response = await authApi.post('verify-otp/', { email, otp, referralCode });
+    // Store auth data without logging
+    if (response.data.access) {
+      localStorage.setItem('token', response.data.access);
+      localStorage.setItem('refreshToken', response.data.refresh);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
     }
-    
-    const response = await authApi.post('verify-otp/', requestData);
-    
-    // Store auth data
-    storeAuthData(response.data);
-    
     return response.data;
   } catch (error) {
-    console.error('Verify OTP error:', error);
-    throw error.message ? error : { error: 'Invalid OTP or verification failed. Please try again.' };
+    throw error.response?.data || error;
   }
 };
 
@@ -374,6 +366,23 @@ export const refreshAccessToken = async () => {
   } catch (error) {
     console.error('Token refresh error:', error);
     clearAuthStorage();
+    return false;
+  }
+};
+
+/**
+ * Validate the token
+ * @param {string} token - Token to be validated
+ * @returns {Promise<boolean>} - Validation status
+ */
+export const validateToken = async (token) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/token/verify/`, {
+      token
+    });
+    return response.status === 200;
+  } catch (error) {
+    console.error('Token validation failed:', error);
     return false;
   }
 };
