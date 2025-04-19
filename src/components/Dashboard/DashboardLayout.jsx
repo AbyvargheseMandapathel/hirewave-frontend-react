@@ -3,8 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   FaHome, FaBriefcase, FaUsers, FaChartBar, FaCog, 
   FaBell, FaSearch, FaUserCircle, FaBars, FaTimes, 
-  FaMoneyBillWave, FaSignOutAlt, FaRss
+  FaMoneyBillWave, FaSignOutAlt, FaRss 
 } from 'react-icons/fa';
+import { MdDashboardCustomize } from "react-icons/md";
+
 import { getCurrentUser, logout } from '../../services/authService';
 
 // Custom scrollbar styles
@@ -69,7 +71,8 @@ const DashboardLayout = ({ children }) => {
     
     if (userType === 'admin') {
       return [
-        { to: '/dashboard/admin', icon: <FaHome />, text: 'Dashboard' },
+        { to: '/', icon: <FaHome />, text: 'Home' },
+        { to: '/dashboard/admin', icon: <MdDashboardCustomize />, text: 'Dashboard' },
         { to: '/dashboard/admin/jobs', icon: <FaBriefcase />, text: 'Jobs' },
         { to: '/dashboard/admin/users', icon: <FaUsers />, text: 'Users' },
         { to: '/dashboard/admin/analytics', icon: <FaChartBar />, text: 'Analytics' },
@@ -79,7 +82,8 @@ const DashboardLayout = ({ children }) => {
       ];
     } else if (userType === 'recruiter') {
       return [
-        { to: '/dashboard/recruiter', icon: <FaHome />, text: 'Dashboard' },
+        { to: '/', icon: <FaHome />, text: 'Home' },
+        { to: '/dashboard/recruiter', icon: <MdDashboardCustomize />, text: 'Dashboard' },
         { to: '/dashboard/recruiter/jobs', icon: <FaBriefcase />, text: 'My Jobs' },
         { to: '/dashboard/recruiter/applications', icon: <FaUsers />, text: 'Applications' },
         { to: '/dashboard/recruiter/analytics', icon: <FaChartBar />, text: 'Analytics' },
@@ -87,7 +91,8 @@ const DashboardLayout = ({ children }) => {
       ];
     } else if (userType === 'jobseeker') {
       return [
-        { to: '/dashboard/jobseeker', icon: <FaHome />, text: 'Dashboard' },
+        { to: '/', icon: <FaHome />, text: 'Home' },
+        { to: '/dashboard/jobseeker', icon: <MdDashboardCustomize />, text: 'Dashboard' },
         { to: '/dashboard/jobseeker/applications', icon: <FaBriefcase />, text: 'My Applications' },
         { to: '/dashboard/jobseeker/saved-jobs', icon: <FaUsers />, text: 'Saved Jobs' },
         { to: '/dashboard/jobseeker/profile', icon: <FaUserCircle />, text: 'My Profile' },

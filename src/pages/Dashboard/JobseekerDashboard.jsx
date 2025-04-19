@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Dashboard/DashboardLayout';
 import { FaBriefcase, FaBookmark, FaHistory, FaCalendarAlt, FaSpinner } from 'react-icons/fa';
-import { getJobseekerDashboardStats } from '../../services/dashboardService';
+import { getJobseekerDashboardStats, jobseekerDashboardService } from '../../services/dashboardService';
 import { Link } from 'react-router-dom';
 
 const JobseekerDashboard = () => {

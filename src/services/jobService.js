@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/jobs/';
+// const API_URL = 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/jobs/';
+const API_URL = 'http://localhost:8000/api/jobs/';
 
 // Helper function to get token and set headers
 const getAuthConfig = () => {

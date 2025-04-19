@@ -1,8 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { getToken, clearToken, hasToken } from '../utils/tokenUtils';
+import { getToken, clearToken, hasToken, storeToken } from '../utils/tokenUtils';
 
-// Remove the duplicate storeToken export and keep it only in tokenUtils.js
+// Get API URL from environment variables with fallback
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api
+const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:8000/api/auth/';
+// https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -25,8 +30,8 @@ export const AuthProvider = ({ children }) => {
           // Set axios default header
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           
-          // Fetch user data
-          const response = await axios.get('https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/users/me/');
+          // Fetch user data using environment variable
+          const response = await axios.get(`${API_URL}/users/me/`);
           setUser(response.data);
           setIsAuthenticated(true);
           console.log("User authenticated:", response.data);
@@ -62,8 +67,8 @@ export const AuthProvider = ({ children }) => {
       // Set axios default header
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      // Fetch user data
-      const response = await axios.get('https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/users/me/');
+      // Fetch user data using environment variable
+      const response = await axios.get(`${API_URL}/users/me/`);
       setUser(response.data);
       setIsAuthenticated(true);
       return true;
@@ -79,7 +84,8 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (credentials) => {
     try {
-      const response = await axios.post('https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/login/', credentials);
+      // Use environment variable for auth API URL
+      const response = await axios.post(`${AUTH_API_URL}login/`, credentials);
       const { token, user } = response.data;
       
       // Use the imported storeToken from tokenUtils
