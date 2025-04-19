@@ -3,65 +3,27 @@ import { getAuthHeader } from './authService';
 import { getSavedJobs } from './savedJobService';
 
 // Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/';
 const DEFAULT_TIMEOUT = 10000;
 
-// Update Axios instance with better auth handling
+// Axios instance
 const apiClient = axios.create({
   baseURL: API_URL,
   timeout: DEFAULT_TIMEOUT,
   headers: { 'Content-Type': 'application/json' }
 });
 
-// Enhanced request interceptor with token refresh
-apiClient.interceptors.request.use(async config => {
-  try {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-    
-    config.headers = {
-      ...config.headers,
-      'Authorization': `Bearer ${token}`
-    };
-    
-    return config;
-  } catch (error) {
-    console.error('Auth configuration error:', error);
-    return Promise.reject(error);
-  }
+// Request interceptor
+apiClient.interceptors.request.use(config => {
+  const authHeader = getAuthHeader();
+  if (authHeader) config.headers = { ...config.headers, ...authHeader };
+  return config;
 }, error => Promise.reject(error));
 
-// Enhanced response interceptor with better error handling
+// Response interceptor
 apiClient.interceptors.response.use(
   response => response,
-  async error => {
-    if (error.response?.status === 403) {
-      console.error('Access forbidden - checking authentication...');
-      // Check if user is logged in
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      if (!token) {
-        console.error('No authentication token found');
-        throw new Error('Please login to access this resource');
-      }
-      
-      // Check if token is still valid
-      try {
-        const isValid = await validateToken(token);
-        if (!isValid) {
-          console.error('Token validation failed');
-          // Clear invalid token
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
-          throw new Error('Session expired. Please login again.');
-        }
-      } catch (validationError) {
-        console.error('Token validation error:', validationError);
-        throw new Error('Authentication error. Please login again.');
-      }
-    }
-    
+  error => {
     const errorMessage = error.response?.data?.message || error.message || 'Request failed';
     console.error(`API Error: ${errorMessage}`, error.response || error);
     return Promise.reject(new Error(errorMessage));
@@ -72,18 +34,9 @@ apiClient.interceptors.response.use(
 export const adminDashboardService = {
   getStats: async function() {
     try {
-      // Verify admin access before making request
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (!user.is_admin) {
-        throw new Error('Unauthorized: Admin access required');
-      }
-
-      const { data } = await apiClient.get('/auth/dashboard/admin/stats/', {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest', 
-        }
-      });
-      
+      console.log('Calling admin stats endpoint...');
+      const { data } = await apiClient.get('dashboard/admin/stats/');
+      console.log('Admin stats response:', data);
       return {
         total_jobs: data.total_jobs || 0,
         total_users: data.total_users || 0,
@@ -91,17 +44,14 @@ export const adminDashboardService = {
         last_updated: data.last_updated || new Date().toISOString()
       };
     } catch (error) {
-      // Provide more specific error messages
-      if (error.response?.status === 403) {
-        throw new Error('You do not have permission to access admin statistics');
-      }
+      console.error('Failed to fetch admin stats:', error);
       throw error;
     }
   },
 
   getJobsStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/admin/job-stats/');
+      const { data } = await apiClient.get('dashboard/admin/stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch job stats:', error);
@@ -111,7 +61,7 @@ export const adminDashboardService = {
 
   getActivityLog: async function(page = 1, limit = 10) {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/admin/activity-log/', {
+      const { data } = await apiClient.get('dashboard/admin/activity-log/', {
         params: { page, limit }
       });
       return data.results || [];
@@ -126,7 +76,7 @@ export const adminDashboardService = {
 export const jobseekerDashboardService = {
   getStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/jobseeker/stats/');
+      const { data } = await apiClient.get('dashboard/jobseeker/stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch jobseeker stats:', error);
@@ -136,7 +86,7 @@ export const jobseekerDashboardService = {
   
   getApplicationStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/jobseeker/application-stats/');
+      const { data } = await apiClient.get('dashboard/jobseeker/application-stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch application stats:', error);
@@ -146,7 +96,7 @@ export const jobseekerDashboardService = {
   
   getRecentJobs: async function(limit = 5) {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/jobseeker/recent-jobs/', {
+      const { data } = await apiClient.get('dashboard/jobseeker/recent-jobs/', {
         params: { limit }
       });
       return data.results || [];
@@ -160,7 +110,7 @@ export const jobseekerDashboardService = {
 // Add the missing exports that are being used in JobseekerDashboard and JobseekerSavedJobs
 export const getJobseekerDashboardStats = async function() {
   try {
-    const { data } = await apiClient.get('/auth/dashboard/jobseeker/stats/');
+    const { data } = await apiClient.get('dashboard/jobseeker/stats/');
     return {
       savedJobsCount: data.saved_jobs_count || 0,
       appliedJobsCount: data.applied_jobs_count || 'Coming Soon',
@@ -180,7 +130,7 @@ export const getJobseekerDashboardStats = async function() {
 
 export const getJobseekerSavedJobs = async function() {
   try {
-    const { data } = await apiClient.get('/auth/dashboard/jobseeker/saved-jobs/');
+    const { data } = await apiClient.get('dashboard/jobseeker/saved-jobs/');
     return {
       results: data.results || [],
       count: data.count || 0
@@ -208,7 +158,7 @@ export const getJobseekerSavedJobs = async function() {
 export const recruiterDashboardService = {
   getStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/recruiter/stats/');
+      const { data } = await apiClient.get('dashboard/recruiter/stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch recruiter stats:', error);
@@ -218,7 +168,7 @@ export const recruiterDashboardService = {
   
   getJobStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/recruiter/job-stats/');
+      const { data } = await apiClient.get('dashboard/recruiter/job-stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch job stats:', error);
@@ -228,7 +178,7 @@ export const recruiterDashboardService = {
   
   getRecentApplications: async function(limit = 5) {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/recruiter/recent-applications/', {
+      const { data } = await apiClient.get('dashboard/recruiter/recent-applications/', {
         params: { limit }
       });
       return data.results || [];
