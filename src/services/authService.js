@@ -107,18 +107,30 @@ export const requestOTP = async (email) => {
  * @param {string} referralCode - Optional referral code
  * @returns {Promise} - Response from the API with tokens and user data
  */
-export const verifyOTP = async (email, otp, referralCode) => {
+export const verifyOTP = async (email, otp, referralCode = null) => {
   try {
-    const response = await authApi.post('verify-otp/', { email, otp, referralCode });
-    // Store auth data without logging
-    if (response.data.access) {
-      localStorage.setItem('token', response.data.access);
-      localStorage.setItem('refreshToken', response.data.refresh);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+    // Make sure otp is a string
+    const otpString = Array.isArray(otp) ? otp.join('') : otp;
+    
+    const requestData = { 
+      email, 
+      otp: otpString 
+    };
+    
+    // Add referral code if provided
+    if (referralCode) {
+      requestData.referralCode = referralCode;
     }
+    
+    const response = await authApi.post('verify-otp/', requestData);
+    
+    // Store auth data
+    storeAuthData(response.data);
+    
     return response.data;
   } catch (error) {
-    throw error.response?.data || error;
+    console.error('Verify OTP error:', error);
+    throw error.message ? error : { error: 'Invalid OTP or verification failed. Please try again.' };
   }
 };
 
