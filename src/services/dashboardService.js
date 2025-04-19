@@ -3,7 +3,7 @@ import { getAuthHeader } from './authService';
 import { getSavedJobs } from './savedJobService';
 
 // Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/';
 const DEFAULT_TIMEOUT = 10000;
 
 // Axios instance
@@ -35,7 +35,7 @@ export const adminDashboardService = {
   getStats: async function() {
     try {
       console.log('Calling admin stats endpoint...');
-      const { data } = await apiClient.get('/auth/dashboard/admin/stats/');
+      const { data } = await apiClient.get('auth/dashboard/admin/stats/');
       console.log('Admin stats response:', data);
       return {
         total_jobs: data.total_jobs || 0,
@@ -51,7 +51,7 @@ export const adminDashboardService = {
 
   getJobsStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/admin/stats/');
+      const { data } = await apiClient.get('auth/dashboard/admin/stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch job stats:', error);
@@ -61,7 +61,7 @@ export const adminDashboardService = {
 
   getActivityLog: async function(page = 1, limit = 10) {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/admin/activity-log/', {
+      const { data } = await apiClient.get('auth/dashboard/admin/activity-log/', {
         params: { page, limit }
       });
       return data.results || [];
@@ -76,7 +76,7 @@ export const adminDashboardService = {
 export const jobseekerDashboardService = {
   getStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/jobseeker/stats/');
+      const { data } = await apiClient.get('auth/dashboard/jobseeker/stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch jobseeker stats:', error);
@@ -86,7 +86,7 @@ export const jobseekerDashboardService = {
   
   getApplicationStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/jobseeker/application-stats/');
+      const { data } = await apiClient.get('auth/dashboard/jobseeker/application-stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch application stats:', error);
@@ -96,7 +96,7 @@ export const jobseekerDashboardService = {
   
   getRecentJobs: async function(limit = 5) {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/jobseeker/recent-jobs/', {
+      const { data } = await apiClient.get('auth/dashboard/jobseeker/recent-jobs/', {
         params: { limit }
       });
       return data.results || [];
@@ -110,7 +110,7 @@ export const jobseekerDashboardService = {
 // Add the missing exports that are being used in JobseekerDashboard and JobseekerSavedJobs
 export const getJobseekerDashboardStats = async function() {
   try {
-    const { data } = await apiClient.get('/auth/dashboard/jobseeker/stats/');
+    const { data } = await apiClient.get('auth/dashboard/jobseeker/stats/');
     return {
       savedJobsCount: data.saved_jobs_count || 0,
       appliedJobsCount: data.applied_jobs_count || 'Coming Soon',
@@ -130,7 +130,7 @@ export const getJobseekerDashboardStats = async function() {
 
 export const getJobseekerSavedJobs = async function() {
   try {
-    const { data } = await apiClient.get('/auth/dashboard/jobseeker/saved-jobs/');
+    const { data } = await apiClient.get('auth/dashboard/jobseeker/saved-jobs/');
     return {
       results: data.results || [],
       count: data.count || 0
@@ -158,7 +158,7 @@ export const getJobseekerSavedJobs = async function() {
 export const recruiterDashboardService = {
   getStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/recruiter/stats/');
+      const { data } = await apiClient.get('auth/dashboard/recruiter/stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch recruiter stats:', error);
@@ -168,7 +168,7 @@ export const recruiterDashboardService = {
   
   getJobStats: async function() {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/recruiter/job-stats/');
+      const { data } = await apiClient.get('auth/dashboard/recruiter/job-stats/');
       return data;
     } catch (error) {
       console.error('Failed to fetch job stats:', error);
@@ -178,7 +178,7 @@ export const recruiterDashboardService = {
   
   getRecentApplications: async function(limit = 5) {
     try {
-      const { data } = await apiClient.get('/auth/dashboard/recruiter/recent-applications/', {
+      const { data } = await apiClient.get('auth/dashboard/recruiter/recent-applications/', {
         params: { limit }
       });
       return data.results || [];
