@@ -3,9 +3,9 @@ import axios from 'axios';
 import { getToken, clearToken, hasToken, storeToken } from '../utils/tokenUtils';
 
 // Get API URL from environment variables with fallback
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
 // https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api
-const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:8000/api/auth/';
+const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/';
 // https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/
 
 const AuthContext = createContext();
