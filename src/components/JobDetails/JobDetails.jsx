@@ -19,6 +19,24 @@ import { isLoggedIn } from '../../services/authService';
 import { getJobs } from '../../services/jobService';
 import { toggleBookmark } from '../../services/savedJobService';
 
+const formatDate = (dateString) => {
+  if (!dateString) return 'recently';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  } catch {
+    return 'recently';
+  }
+};
+
+const sanitizeHtml = (html) => {
+  try {
+    return html?.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') || '';
+  } catch {
+    return '';
+  }
+};
+
 const JobDetails = ({ 
   jobId, 
   job,
@@ -210,7 +228,7 @@ const JobDetails = ({
               <DetailItem 
                 icon={<FaClock className="text-[#818cf8] text-xl" />}
                 label="Posted"
-                value={job.posted_date || job.created_at || 'recently'}
+                value={formatDate(job.posted_date || job.created_at)}
               />
             </div>
 
@@ -218,7 +236,7 @@ const JobDetails = ({
               <h2 className="text-2xl font-semibold text-white mb-4">Job Description</h2>
               <div 
                 className="text-[#ffffff] leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: job.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(job.description) }}
               />
             </div>
 
