@@ -217,7 +217,7 @@ const Login = () => {
                   name="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.toLowerCase())}
                   placeholder="Enter your email"
                   icon={<FaEnvelope className="text-[#94a3b8]" />}
                   label="Email Address"
