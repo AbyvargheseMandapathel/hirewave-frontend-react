@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchCategoriesApi, createCategory } from '../../api/blogApi';
+import { fetchCategoriesApi, createCategory } from '../../services/blogApi';
 import { FaPlus } from 'react-icons/fa';
 
 const CategoryManager = ({ onSelectCategory, selectedCategory }) => {

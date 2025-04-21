@@ -5,7 +5,7 @@ import SimpleRichTextEditor from '../../components/SimpleRichTextEditor/SimpleRi
 import axios from 'axios';
 import { AuthContext } from '../../contexts/AuthContext';
 import { getToken } from '../../utils/tokenUtils';
-import { fetchCategoriesApi } from '../../api/blogApi';
+import { fetchCategoriesApi } from '../../services/blogApi';
 import CategoryManager from './CategoryManager';
 
 const BlogPostEditor = ({ post, onSave, onCancel }) => {
