@@ -193,7 +193,7 @@ const BlogPostEditor = ({ post, onSave, onCancel }) => {
 
       const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
       const url = post 
-        ? `${API_URL}/blog/posts/${post.id}/`
+        ? `${API_URL}/blog/posts/${post.slug}/`
         : `${API_URL}/blog/posts/`;
 
       const method = post ? 'put' : 'post';
