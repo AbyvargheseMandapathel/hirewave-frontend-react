@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from '../utils/tokenUtils';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
 
 // Configure axios with authentication
 const getAuthConfig = () => {

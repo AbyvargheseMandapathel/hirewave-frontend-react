@@ -17,7 +17,7 @@ const BlogComments = ({ postId }) => {
     const fetchComments = async () => {
       try {
         setLoading(true);
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+        const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
         const response = await axios.get(`${API_URL}/blog/comments/`, {
           params: { post: postId },
           headers: getAuthHeader()
@@ -44,7 +44,7 @@ const BlogComments = ({ postId }) => {
     
     try {
       setSubmitting(true);
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
       const response = await axios.post(
         `${API_URL}/blog/comments/`,
         { post: postId, content: newComment },
