@@ -123,8 +123,8 @@ const BlogDetail = () => {
             <p className="text-lg font-semibold">Error Loading Article</p>
           </div>
           <p className="mb-4">{error}</p>
-          <Link to="/blog" className="mt-4 inline-block bg-[#334155] text-white px-5 py-2 rounded-lg hover:bg-[#475569] transition-colors duration-300 shadow-md">
-            <FaArrowLeft className="inline mr-2" /> Back to Blog
+          <Link to="/" className="mt-4 inline-block bg-[#334155] text-white px-5 py-2 rounded-lg hover:bg-[#475569] transition-colors duration-300 shadow-md">
+            <FaArrowLeft className="inline mr-2" /> Back to Home
           </Link>
         </div>
       </div>
@@ -136,8 +136,8 @@ const BlogDetail = () => {
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-6 rounded-lg shadow-lg mb-6" role="alert">
           <p className="text-lg font-semibold mb-4">Blog post not found.</p>
-          <Link to="/blog" className="mt-4 inline-block bg-[#334155] text-white px-5 py-2 rounded-lg hover:bg-[#475569] transition-colors duration-300 shadow-md">
-            <FaArrowLeft className="inline mr-2" /> Back to Blog
+          <Link to="/" className="mt-4 inline-block bg-[#334155] text-white px-5 py-2 rounded-lg hover:bg-[#475569] transition-colors duration-300 shadow-md">
+            <FaArrowLeft className="inline mr-2" /> Back to Home
           </Link>
         </div>
       </div>
@@ -148,8 +148,8 @@ const BlogDetail = () => {
     <div className="bg-[#0f172a] min-h-screen pt-8 pb-16">
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Back button */}
-        <Link to="/blog" className="inline-flex items-center text-[#818cf8] hover:text-[#a5b4fc] mb-8 transition-colors duration-300">
-          <FaArrowLeft className="mr-2" /> Back to Blog
+        <Link to="/" className="inline-flex items-center text-[#818cf8] hover:text-[#a5b4fc] mb-8 transition-colors duration-300">
+          <FaArrowLeft className="mr-2" /> Back to Home
         </Link>
         
         <div className="flex flex-col lg:flex-row gap-10">

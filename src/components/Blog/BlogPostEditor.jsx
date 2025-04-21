@@ -224,7 +224,7 @@ const BlogPostEditor = ({ post, onSave, onCancel }) => {
       } else {
         console.warn('Blog post created but no slug was returned');
         // Fallback to blog listing
-        navigate('/blog');
+        navigate('/');
       }
 
     } catch (error) {

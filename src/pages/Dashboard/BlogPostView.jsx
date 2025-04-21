@@ -32,7 +32,7 @@ const BlogPostView = () => {
   // Handle going back
   const handleBack = () => {
     if (isJobseeker) {
-      navigate('/jobseeker/blog');
+      navigate('/');
     } else {
       navigate('/dashboard/admin/blog');
     }
@@ -113,14 +113,14 @@ const BlogPostView = () => {
               )}
             </div>
           </div>
-          {/* <div>
+          <div>
             <button
               onClick={handleBack}
               className="px-4 py-2 bg-[#0f172a] text-[#94a3b8] rounded-lg border border-[#334155] hover:bg-[#1e293b]"
             >
               Back to Blog
             </button>
-          </div> */}
+          </div>
         </div>
 
         {/* Post Content */}
