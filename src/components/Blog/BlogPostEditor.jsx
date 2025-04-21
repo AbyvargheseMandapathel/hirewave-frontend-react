@@ -4,7 +4,7 @@ import Button from '../common/Button';
 import SimpleRichTextEditor from '../../components/SimpleRichTextEditor/SimpleRichTextEditor';
 import axios from 'axios';
 import { AuthContext } from '../../contexts/AuthContext';
-import { getToken, hasToken } from '../../utils/tokenUtils';
+import { getToken } from '../../utils/tokenUtils';
 import { fetchCategoriesApi } from '../../api/blogApi';
 import CategoryManager from './CategoryManager';
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchCategoriesApi, createCategory } from '../../api/blogApi';
-import { FaPlus, FaTimes } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 
 const CategoryManager = ({ onSelectCategory, selectedCategory }) => {
   const [categories, setCategories] = useState([]);
