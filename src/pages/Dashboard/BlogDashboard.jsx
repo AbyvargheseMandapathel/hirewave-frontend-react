@@ -158,7 +158,7 @@ const BlogDashboard = () => {
           </div>
           <div className="mt-4 md:mt-0">
             <Link
-              to="/dashboard/blog/create"
+              to="/dashboard/admin/blog/create"
               className="bg-gradient-to-r from-[#818cf8] to-[#a5b4fc] text-white px-4 py-2 rounded-lg hover:from-[#a5b4fc] hover:to-[#818cf8] transition-all duration-300 flex items-center"
             >
               <FaPlus className="mr-2" /> Create New Post

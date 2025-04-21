@@ -3,7 +3,7 @@ import { getAuthHeader } from './authService';
 import { getSavedJobs } from './savedJobService';
 
 // Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/';
+const API_URL = import.meta.env.VITE_AUTH_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/';
 const DEFAULT_TIMEOUT = 10000;
 
 // Axios instance

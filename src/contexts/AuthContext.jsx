@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq2
 const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/';
 // https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const useAuth = () => {
   return useContext(AuthContext);
@@ -31,10 +31,9 @@ export const AuthProvider = ({ children }) => {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           
           // Fetch user data using environment variable
-          const response = await axios.get(`${API_URL}/users/me/`);
+          const response = await axios.get(`${API_URL}/auth/profile/`);
           setUser(response.data);
           setIsAuthenticated(true);
-          console.log("User authenticated:", response.data);
         } else {
           // No token found
           setUser(null);
@@ -68,7 +67,7 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       // Fetch user data using environment variable
-      const response = await axios.get(`${API_URL}/users/me/`);
+      const response = await axios.get(`${API_URL}/auth/profile`);
       setUser(response.data);
       setIsAuthenticated(true);
       return true;

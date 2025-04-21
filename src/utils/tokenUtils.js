@@ -30,7 +30,7 @@ export const storeToken = (token) => {
 export const getToken = () => {
     try {
         // Try localStorage first
-        let token = localStorage.getItem('token');
+        let token = localStorage.getItem('accessToken');
         if (token) {
             // Ensure axios headers are set
             import('axios').then(axios => {
@@ -94,3 +94,4 @@ export const clearToken = () => {
 export const hasToken = () => {
     return !!getToken();
 };
+

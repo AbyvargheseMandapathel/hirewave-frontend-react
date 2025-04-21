@@ -69,6 +69,7 @@ import Unauthorized from './pages/Unauthorized';
 
 // Add this import at the top with your other imports
 import VerifyOTP from './pages/VerifyOTP';
+import BlogDetail from './pages/Blog/BlogDetail';
 
 // Then in your Routes section, add:
 
@@ -88,6 +89,7 @@ function App() {
             <Route path="/contact-us" element={<Layout><ContactUs /></Layout>} />
             <Route path="/about-us" element={<Layout><AboutUs /></Layout>} />
             <Route path="/job/:id" element={<Layout><Job /></Layout>} />
+            <Route path="/blog/:postSlug" element={<Layout><BlogDetail /></Layout>} />
             <Route path="/verify-otp" element={<Layout><VerifyOTP /></Layout>} />
             {/* Wrap the AddJobUpdate component with the error boundary */}
                     <Route 

@@ -247,7 +247,7 @@ const BlogAdminDashboard = () => {
               )}
             </div>
             <button
-              onClick={() => navigate('/dashboard/blog/create')}
+              onClick={() => navigate('/dashboard/admin/blog/create')}
               className="flex items-center px-4 py-2 bg-[#818cf8] text-white rounded-lg hover:bg-[#6366f1]"
             >
               <FaPlus className="mr-2" />
