@@ -18,6 +18,13 @@ const BlogDetail = () => {
   const [relatedPosts, setRelatedPosts] = useState([]);
   const currentUser = getCurrentUser();
 
+  // Check if user is logged in and redirect if not
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      navigate('/login', { state: { from: `/blog/${postSlug}` } });
+    }
+  }, [navigate, postSlug]);
+
   // Define the incrementViewCount function
   const incrementViewCount = async () => {
     try {
@@ -32,6 +39,9 @@ const BlogDetail = () => {
 
   useEffect(() => {
     const fetchBlogPost = async () => {
+      // If not logged in, don't fetch data
+      if (!isLoggedIn()) return;
+      
       try {
         setLoading(true);
         setError(null);
@@ -66,11 +76,13 @@ const BlogDetail = () => {
       fetchBlogPost();
       
       // Only increment view count once per session for this post
-      const viewedKey = `viewed_post_${postSlug}`;
-      if (!sessionStorage.getItem(viewedKey)) {
-        incrementViewCount();
-        // Mark this post as viewed in this session
-        sessionStorage.setItem(viewedKey, 'true');
+      if (isLoggedIn()) {
+        const viewedKey = `viewed_post_${postSlug}`;
+        if (!sessionStorage.getItem(viewedKey)) {
+          incrementViewCount();
+          // Mark this post as viewed in this session
+          sessionStorage.setItem(viewedKey, 'true');
+        }
       }
     }
   }, [postSlug]);

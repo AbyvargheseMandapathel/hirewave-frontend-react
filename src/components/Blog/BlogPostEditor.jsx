@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { FaSave, FaImage, FaTimes, FaPlus, FaCalendarAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 import SimpleRichTextEditor from '../../components/SimpleRichTextEditor/SimpleRichTextEditor';
 import axios from 'axios';
@@ -9,6 +10,7 @@ import { fetchCategoriesApi } from '../../services/blogApi';
 import CategoryManager from './CategoryManager';
 
 const BlogPostEditor = ({ post, onSave, onCancel }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: post?.title || '',
     content: post?.content || '',
@@ -210,7 +212,20 @@ const BlogPostEditor = ({ post, onSave, onCancel }) => {
         throw new Error(response.data.error);
       }
 
+      // Call the onSave callback
       onSave(response.data);
+      
+      // Redirect to the blog post page
+      if (response.data.slug) {
+        // Wait a moment to ensure the blog post is fully processed
+        setTimeout(() => {
+          navigate(`/blog/${response.data.slug}`);
+        }, 500);
+      } else {
+        console.warn('Blog post created but no slug was returned');
+        // Fallback to blog listing
+        navigate('/blog');
+      }
 
     } catch (error) {
       console.error('Submission error:', error);
