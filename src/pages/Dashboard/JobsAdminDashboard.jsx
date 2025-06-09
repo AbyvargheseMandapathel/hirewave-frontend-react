@@ -5,6 +5,7 @@ import JobsTable from '../../components/Dashboard/JobsTable';
 import JobsStatusChart from '../../components/Dashboard/JobsStatusChart';
 import JobsActivityLog from '../../components/Dashboard/JobsActivityLog';
 import { FaFilter, FaDownload, FaUserTie, FaBuilding, FaEye, FaThumbsUp } from 'react-icons/fa';
+import { getAuthHeader } from '../../services/authService'; // Import getAuthHeader function
 
 const JobsAdminDashboard = () => {
   const [jobsData, setJobsData] = useState([]);
@@ -17,6 +18,8 @@ const JobsAdminDashboard = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
+        
+        
         const response = await fetch(
           'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/jobs/?page=1&limit=6'
         );
@@ -38,8 +41,10 @@ const JobsAdminDashboard = () => {
         }));
 
         setJobsData(mappedJobs);
+        setLoading(false);
       } catch (err) {
         setError(err.message);
+        setLoading(false);
       }
     };
 
@@ -50,16 +55,22 @@ const JobsAdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        // Get auth headers
+        const headers = getAuthHeader();
+        
         const response = await fetch(
-          'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/dashboard/admin/stats/' 
+          'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/dashboard/admin/stats/',
+          { headers } // Add headers to the request
         );
         if (!response.ok) throw new Error('Failed to fetch stats');
 
         const result = await response.json();
 
         setDashboardStats(result);
+        setLoading(false);
       } catch (err) {
         setError(err.message);
+        setLoading(false);
       }
     };
 
