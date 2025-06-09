@@ -8,6 +8,7 @@ import { FaFilter, FaDownload, FaUserTie, FaBuilding, FaEye, FaThumbsUp } from '
 
 const JobsAdminDashboard = () => {
   const [jobsData, setJobsData] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'admin', 'recruiter'
@@ -23,15 +24,14 @@ const JobsAdminDashboard = () => {
 
         const result = await response.json();
 
-        // Map API response to your UI structure
         const mappedJobs = result.results.map((job, index) => ({
           id: job.id || index + 1,
           title: job.title || 'Untitled',
           company: job.company || 'Private',
           status: job.status === 'active' ? 'Open' : job.status.charAt(0).toUpperCase() + job.status.slice(1),
           date: new Date(job.created_at).toLocaleDateString(),
-          views: Math.floor(Math.random() * 200) + 100, // mock data
-          interested: Math.floor(Math.random() * 30) + 10, // mock data
+          views: Math.floor(Math.random() * 200) + 100,
+          interested: Math.floor(Math.random() * 30) + 10,
           postedBy: job.posted_by ? 'recruiter' : 'admin',
           recruiterName: job.posted_by ? 'John Doe' : undefined,
           externalLink: job.external_link || '#', 
@@ -40,12 +40,30 @@ const JobsAdminDashboard = () => {
         setJobsData(mappedJobs);
       } catch (err) {
         setError(err.message);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchJobs();
+  }, []);
+
+  // Fetch dashboard stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(
+          'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/dashboard/admin/stats/' 
+        );
+        if (!response.ok) throw new Error('Failed to fetch stats');
+
+        const result = await response.json();
+
+        setDashboardStats(result);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchStats();
   }, []);
 
   // Filter jobs based on active tab
@@ -53,40 +71,42 @@ const JobsAdminDashboard = () => {
     ? jobsData
     : jobsData.filter((job) => job.postedBy === activeTab);
 
-  // Stats calculation
-  const statsData = [
-    {
-      title: 'Total Jobs',
-      value: jobsData.length.toString(),
-      change: '+12%',
-      isPositive: true,
-      icon: <FaBuilding className="text-[#818cf8] text-xl" />,
-    },
-    {
-      title: 'Total Views',
-      value: jobsData.reduce((sum, job) => sum + job.views, 0).toLocaleString(),
-      change: '+18%',
-      isPositive: true,
-      icon: <FaEye className="text-[#818cf8] text-xl" />,
-    },
-    {
-      title: 'Interested Users',
-      value: jobsData.reduce((sum, job) => sum + job.interested, 0).toLocaleString(),
-      change: '+24%',
-      isPositive: true,
-      icon: <FaThumbsUp className="text-[#818cf8] text-xl" />,
-    },
-    {
-      title: 'Applications',
-      value: jobsData.reduce(
-        (sum, job) => sum + (job.applications ? parseInt(job.applications, 10) : 0),
-        0
-      ).toLocaleString(),
-      change: '+15%',
-      isPositive: true,
-      icon: <FaUserTie className="text-[#818cf8] text-xl" />,
-    },
-  ];
+  // Stats calculation using real stats or fallback
+  const statsData = dashboardStats
+    ? [
+        {
+          title: 'Total Jobs',
+          value: dashboardStats.total_jobs?.toString() || jobsData.length.toString(),
+          change: '+12%',
+          isPositive: true,
+          icon: <FaBuilding className="text-[#818cf8] text-xl" />,
+        },
+        {
+          title: 'Total Views',
+          value: jobsData.reduce((sum, job) => sum + job.views, 0).toLocaleString(),
+          change: '+18%',
+          isPositive: true,
+          icon: <FaEye className="text-[#818cf8] text-xl" />,
+        },
+        {
+          title: 'Interested Users',
+          value: jobsData.reduce((sum, job) => sum + job.interested, 0).toLocaleString(),
+          change: '+24%',
+          isPositive: true,
+          icon: <FaThumbsUp className="text-[#818cf8] text-xl" />,
+        },
+        {
+          title: 'Applications',
+          value: jobsData.reduce(
+            (sum, job) => sum + (job.applications ? parseInt(job.applications, 10) : 0),
+            0
+          ).toLocaleString(),
+          change: '+15%',
+          isPositive: true,
+          icon: <FaUserTie className="text-[#818cf8] text-xl" />,
+        },
+      ]
+    : [];
 
   // Recent activities (mock for now)
   const jobActivities = [
@@ -95,11 +115,10 @@ const JobsAdminDashboard = () => {
     { id: 3, type: 'job_closed', title: 'Job Closed', description: 'DevOps Engineer', time: '1 day ago' },
   ];
 
-  // Show loading or error
-  if (loading) {
+  if (loading && !jobsData.length) {
     return (
       <DashboardLayout>
-        <div className="p-6 text-white">Loading jobs...</div>
+        <div className="p-6 text-white">Loading dashboard...</div>
       </DashboardLayout>
     );
   }
@@ -107,7 +126,7 @@ const JobsAdminDashboard = () => {
   if (error) {
     return (
       <DashboardLayout>
-        <div className="p-6 text-red-500">Error fetching jobs: {error}</div>
+        <div className="p-6 text-red-500">Error loading data: {error}</div>
       </DashboardLayout>
     );
   }
