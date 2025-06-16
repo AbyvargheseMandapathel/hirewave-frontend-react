@@ -19,20 +19,19 @@ import {
 } from "react-icons/fa";
 
 const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = true }) => {
+  // Update state declarations
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [pageSize] = useState(6);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalJobs, setTotalJobs] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("date");
   const [sortDirection, setSortDirection] = useState("desc");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(6);
-  const [hasNext, setHasNext] = useState(false);
-  const [hasPrevious, setHasPrevious] = useState(false);
   const [openActionsId, setOpenActionsId] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
@@ -63,13 +62,15 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
   const loadJobs = async (pageNumber) => {
     try {
       setLoading(true);
-      const data = await fetchDashboardJobs(pageNumber, pageSize);
+      const response = await fetchJobs(pageNumber, pageSize);
       
-      setJobs(data.results);
-      setTotalJobs(data.count);
-      setHasNext(!!data.next);
-      setHasPrevious(!!data.previous);
-      setCurrentPage(pageNumber);
+      if (response && response.results) {
+        setJobs(response.results);
+        setTotalJobs(response.count);
+        // Calculate total pages
+        setTotalPages(Math.ceil(response.count / pageSize));
+        setCurrentPage(pageNumber);
+      }
       setError(null);
     } catch (err) {
       console.error('Error loading jobs:', err);
@@ -86,13 +87,13 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
   }, []);
 
   const handleNextPage = () => {
-    if (hasNext) {
+    if (hasMore) {
       loadJobs(currentPage + 1);
     }
   };
 
   const handlePreviousPage = () => {
-    if (hasPrevious) {
+    if (currentPage > 1) {
       loadJobs(currentPage - 1);
     }
   };
@@ -459,30 +460,59 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
       </div>
 
       {/* Updated Pagination Controls */}
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="text-sm text-[#94a3b8]">
-          Showing {jobs.length} of {totalJobs} jobs
+          Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalJobs)} of {totalJobs} jobs
         </div>
+        
         <div className="flex items-center space-x-4">
           <button
-            onClick={handlePreviousPage}
-            disabled={!hasPrevious || loading}
+            onClick={() => loadJobs(currentPage - 1)}
+            disabled={currentPage === 1 || loading}
             className={`px-4 py-2 rounded-lg border ${
-              hasPrevious && !loading
+              currentPage > 1 && !loading
                 ? 'border-[#818cf8] text-[#818cf8] hover:bg-[#818cf8] hover:text-white'
                 : 'border-[#475569] text-[#475569] cursor-not-allowed'
             }`}
           >
             Previous
           </button>
-          <span className="text-[#94a3b8">
-            Page {currentPage}
-          </span>
+
+          {/* Page Numbers */}
+          <div className="flex items-center space-x-2">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => loadJobs(pageNum)}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    currentPage === pageNum
+                      ? 'bg-[#818cf8] text-white'
+                      : 'text-[#94a3b8] hover:bg-[#334155]'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+
           <button
-            onClick={handleNextPage}
-            disabled={!hasNext || loading}
+            onClick={() => loadJobs(currentPage + 1)}
+            disabled={currentPage === totalPages || loading}
             className={`px-4 py-2 rounded-lg border ${
-              hasNext && !loading
+              currentPage < totalPages && !loading
                 ? 'border-[#818cf8] text-[#818cf8] hover:bg-[#818cf8] hover:text-white'
                 : 'border-[#475569] text-[#475569] cursor-not-allowed'
             }`}
