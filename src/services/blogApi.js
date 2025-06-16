@@ -49,11 +49,12 @@ export const fetchBlogPosts = async () => {
   }
 };
 
-export const deleteBlogPost = async (postId) => {
+export const deleteBlogPost = async (slug) => {
   try {
-    await api.delete(`/blog/posts/${postId}/`, getAuthConfig());
+    await api.delete(`/blog/posts/${slug}/`, getAuthConfig());
+    console.log('🗑️ Blog post deleted:', slug);
   } catch (error) {
-    console.error(`Error deleting blog post ${postId}:`, error);
+    console.error(`❌ Failed to delete blog post ${slug}:`, error);
     throw error;
   }
 };
@@ -99,6 +100,16 @@ export const deleteCategory = async (categoryId) => {
     console.log('🗑️ Category deleted:', categoryId);
   } catch (error) {
     console.error(`❌ Failed to delete category ${categoryId}:`, error);
+    throw error;
+  }
+};
+
+export const getBlogPost = async (slug) => {
+  try {
+    const response = await api.get(`/blog/posts/${slug}/`, getAuthConfig());
+    return response.data;
+  } catch (error) {
+    console.error(`❌ Failed to fetch blog post ${slug}:`, error);
     throw error;
   }
 };

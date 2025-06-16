@@ -41,6 +41,7 @@ import JobseekerDashboard from './pages/Dashboard/JobseekerDashboard';
 import JobseekerSavedJobs from './pages/Dashboard/JobseekerSavedJobs';
 import ComingSoon from './pages/ComingSoon'; // Import the ComingSoon page
 import JobFormErrorBoundary from './components/ErrorBoundary/JobFormErrorBoundary';
+import EditJob from './pages/Dashboard/EditJob';
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
@@ -268,6 +269,9 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Edit Job Route */}
+            <Route path="/dashboard/jobs/edit/:id" element={<EditJob />} />
             
             {/* Catch-all route - redirect to Coming Soon */}
             <Route path="*" element={<ComingSoon />} />

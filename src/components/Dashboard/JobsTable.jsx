@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { fetchJobs, updateJob } from "../../services/jobApi";
+import { toast } from "react-hot-toast";
 import {
   FaEllipsisV,
   FaPlus,
@@ -16,12 +18,14 @@ import {
   FaTimes,
 } from "react-icons/fa";
 
-const JobsTable = ({
-  jobs,
-  showPostedBy = false,
-  showApplicants = true,
-  showStatus = true,
-}) => {
+const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = true }) => {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("date");
   const [sortDirection, setSortDirection] = useState("desc");
@@ -30,6 +34,7 @@ const JobsTable = ({
   const [openActionsId, setOpenActionsId] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
+  const navigate = useNavigate();
 
   // Check if the screen is mobile size
   useEffect(() => {
@@ -51,6 +56,46 @@ const JobsTable = ({
       setSearchExpanded(false);
     }
   }, [isMobile]);
+
+  const loadJobs = async (pageNumber) => {
+    try {
+      setLoadingMore(true);
+      const response = await fetchJobs(pageNumber);
+      
+      if (pageNumber === 1) {
+        setJobs(response.results);
+      } else {
+        setJobs(prev => [...prev, ...response.results]);
+      }
+      
+      setHasMore(response.has_more);
+      setTotalJobs(response.total);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch jobs');
+      toast.error('Error loading jobs');
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    loadJobs(1);
+  }, []);
+
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      loadJobs(nextPage);
+    }
+  };
+
+  const handleEdit = (job) => {
+    navigate(`/dashboard/jobs/edit/${job.id}`, { state: { job } });
+  };
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -376,25 +421,25 @@ const JobsTable = ({
       {/* Pagination Controls */}
       <div className="mt-4 flex flex-col md:flex-row justify-between items-center">
         <div className="text-[#94a3b8] text-sm mb-3 md:mb-0">
-          Showing {indexOfFirstJob + 1}-{Math.min(indexOfLastJob, filteredJobs.length)} of {filteredJobs.length} jobs
+          Showing {jobs.length} of {totalJobs} jobs
         </div>
-        <div className="flex items-center">
+        {hasMore && (
           <button
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
+            onClick={handleLoadMore}
+            disabled={loadingMore}
             className="px-4 py-2 text-[#818cf8] hover:text-[#a5b4fc] disabled:text-[#64748b] disabled:cursor-not-allowed"
           >
-            Previous
+            {loadingMore ? 'Loading...' : 'Load More'}
           </button>
-          <button
-            onClick={() => paginate(currentPage + 1)}
-            disabled={indexOfLastJob >= filteredJobs.length}
-            className="px-4 py-2 text-[#818cf8] hover:text-[#a5b4fc] disabled:text-[#64748b] disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
+        )}
       </div>
+
+      {/* Loading indicator */}
+      {loadingMore && (
+        <div className="text-center mt-4">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#818cf8]"></div>
+        </div>
+      )}
     </div>
   );
 };

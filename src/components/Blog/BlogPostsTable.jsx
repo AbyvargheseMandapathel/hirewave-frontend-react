@@ -64,17 +64,46 @@ const BlogPostsTable = () => {
   }, []);
 
   // Handle delete
-  const handleDelete = async (postId) => {
+  const handleDelete = async (slug) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this post?");
     if (confirmDelete) {
       try {
-        await deleteBlogPost(postId);
-        setPosts(posts.filter(post => post.id !== postId));
+        await deleteBlogPost(slug);
+        setPosts(posts.filter(post => post.slug !== slug));
         toast.success('Post deleted successfully');
       } catch (err) {
         toast.error('Failed to delete post');
         console.error('Error:', err);
       }
+    }
+  };
+
+  // Action handlers
+  const handleEdit = (post) => {
+    navigate(`/dashboard/blog/edit/${post.slug}`, { state: { post } });
+  };
+
+  const handleView = (post) => {
+    navigate(`/dashboard/blog/view/${post.slug}`, { state: { post } });
+  };
+
+  // Add this function before the return statement
+  const getSortIcon = (field) => {
+    if (sortField !== field) {
+      return <FaSort className="ml-1 text-gray-400" />;
+    }
+    return sortDirection === 'asc' 
+      ? <FaSortUp className="ml-1 text-indigo-400" />
+      : <FaSortDown className="ml-1 text-indigo-400" />;
+  };
+
+  // Add sort handler
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
     }
   };
 
@@ -149,36 +178,6 @@ const BlogPostsTable = () => {
     );
   };
 
-  // Action handlers
-  const handleEdit = (post) => {
-    navigate(`/dashboard/blog/edit/${post.id}`, { state: { post } });
-  };
-
-
-  const handleView = (post) => {
-    navigate(`/dashboard/blog/view/${post.id}`, { state: { post } });
-  };
-
-  // Add this function before the return statement
-  const getSortIcon = (field) => {
-    if (sortField !== field) {
-      return <FaSort className="ml-1 text-gray-400" />;
-    }
-    return sortDirection === 'asc' 
-      ? <FaSortUp className="ml-1 text-indigo-400" />
-      : <FaSortDown className="ml-1 text-indigo-400" />;
-  };
-
-  // Add sort handler
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
   return (
     <div className="bg-[#1e293b] rounded-xl shadow-lg border border-[#334155] overflow-hidden">
       <div className="p-6">
@@ -231,7 +230,7 @@ const BlogPostsTable = () => {
 
             <tbody className="bg-[#1e293b] divide-y divide-[#334155]">
               {currentPosts.map((post) => (
-                <tr key={post.id} className="hover:bg-[#0f172a]">
+                <tr key={post.slug} className="hover:bg-[#0f172a]">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {post.featured && <FaStar className="text-yellow-400 mr-2" />}
@@ -276,7 +275,7 @@ const BlogPostsTable = () => {
                       <button
                         className="text-[#f87171] hover:text-[#fca5a5]"
                         title="Delete"
-                        onClick={() => handleDelete(post.id)}
+                        onClick={() => handleDelete(post.slug)}
                       >
                         <FaTrash />
                       </button>
