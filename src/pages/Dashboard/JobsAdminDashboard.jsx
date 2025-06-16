@@ -178,7 +178,7 @@ const JobsAdminDashboard = () => {
 
         {/* Add New Job Button */}
         <div className="mb-6">
-          <Link to="/dashboard/jobs/add" className="inline-block px-4 py-2 bg-[#4caf50] text-white rounded-md shadow-md hover:bg-[#45a049] transition-all">
+          <Link to="/add-job" className="inline-block px-4 py-2 bg-[#4caf50] text-white rounded-md shadow-md hover:bg-[#45a049] transition-all">
             Add New Job
           </Link>
         </div>
