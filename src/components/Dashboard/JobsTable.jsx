@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { fetchJobs, updateJob } from "../../services/jobApi";
+import { fetchJobs, updateJob, deleteJob } from "../../services/jobApi";
 import { toast } from "react-hot-toast";
 import {
   FaEllipsisV,
@@ -171,11 +171,37 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
   };
 
   // Handle action selection
-  const handleAction = (action, jobId) => {
-    console.log(`Action: ${action}, Job ID: ${jobId}`);
-    setOpenActionsId(null); // Close the dropdown after selecting an action
+  const handleAction = async (action, jobId) => {
+    setOpenActionsId(null); // Close the dropdown
+
+    switch (action) {
+      case 'edit':
+        navigate(`/dashboard/jobs/edit/${jobId}`);
+        break;
+        
+      case 'delete':
+        if (window.confirm('Are you sure you want to delete this job?')) {
+          try {
+            await deleteJob(jobId);
+            setJobs(jobs.filter(job => job.id !== jobId));
+            toast.success('Job deleted successfully');
+          } catch (error) {
+            console.error('Error deleting job:', error);
+            toast.error('Failed to delete job');
+          }
+        }
+        break;
+        
+      case 'view':
+        navigate(`/job/${jobId}`);
+        break;
+        
+      default:
+        break;
+    }
   };
 
+  // Update the actions dropdown in the table
   return (
     <div className="bg-[#1e293b] rounded-xl shadow-lg border border-[#334155] p-4 md:p-6 overflow-hidden">
       <div className="flex justify-between items-center mb-6 relative">
@@ -326,7 +352,7 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
               <tr key={job.id} className="hover:bg-[#0f172a]">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Link 
-                    to={`/dashboard/jobs/${job.id}`}
+                    to={`/job/${job.id}`}
                     className="text-[#818cf8] hover:text-[#a5b4fc]"
                   >
                     {job.title}
@@ -405,19 +431,19 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
                       <div className="absolute right-0 top-8 bg-[#1e293b] border border-[#334155] rounded-lg shadow-lg z-10">
                         <button
                           className="flex items-center w-full px-4 py-2 text-sm text-[#94a3b8] hover:bg-[#334155]"
-                          onClick={() => handleAction("edit", job.id)}
+                          onClick={() => handleAction('edit', job.id)}
                         >
                           <FaEdit className="mr-2" /> Edit
                         </button>
                         <button
                           className="flex items-center w-full px-4 py-2 text-sm text-[#94a3b8] hover:bg-[#334155]"
-                          onClick={() => handleAction("delete", job.id)}
+                          onClick={() => handleAction('delete', job.id)}
                         >
                           <FaTrash className="mr-2" /> Delete
                         </button>
                         <button
                           className="flex items-center w-full px-4 py-2 text-sm text-[#94a3b8] hover:bg-[#334155]"
-                          onClick={() => handleAction("view", job.id)}
+                          onClick={() => handleAction('view', job.id)}
                         >
                           <FaInfoCircle className="mr-2" /> View Details
                         </button>

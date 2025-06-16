@@ -31,3 +31,13 @@ export const updateJob = async (jobId, jobData) => {
     throw error;
   }
 };
+
+// Add deleteJob function
+export const deleteJob = async (id) => {
+  try {
+    await axios.delete(`${API_URL}/jobs/${id}/`, getAuthConfig());
+  } catch (error) {
+    console.error('Error deleting job:', error);
+    throw error;
+  }
+};
