@@ -30,7 +30,9 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
   const [sortField, setSortField] = useState("date");
   const [sortDirection, setSortDirection] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [jobsPerPage] = useState(5);
+  const [pageSize] = useState(6);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
   const [openActionsId, setOpenActionsId] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
@@ -60,18 +62,14 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
   // Check if response data exists before accessing it
   const loadJobs = async (pageNumber) => {
     try {
-      setLoadingMore(true);
-      const data = await fetchJobs(pageNumber);
+      setLoading(true);
+      const data = await fetchJobs(pageNumber, pageSize);
       
-      if (data && data.results) {
-        if (pageNumber === 1) {
-          setJobs(data.results);
-        } else {
-          setJobs(prev => [...prev, ...data.results]);
-        }
-        setHasMore(!!data.next);
-        setTotalJobs(data.count || 0);
-      }
+      setJobs(data.results);
+      setTotalJobs(data.count);
+      setHasNext(!!data.next);
+      setHasPrevious(!!data.previous);
+      setCurrentPage(pageNumber);
       setError(null);
     } catch (err) {
       console.error('Error loading jobs:', err);
@@ -79,7 +77,6 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
       toast.error('Error loading jobs');
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   };
 
@@ -88,11 +85,15 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
     loadJobs(1);
   }, []);
 
-  const handleLoadMore = () => {
-    if (!loadingMore && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      loadJobs(nextPage);
+  const handleNextPage = () => {
+    if (hasNext) {
+      loadJobs(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (hasPrevious) {
+      loadJobs(currentPage - 1);
     }
   };
 
@@ -158,8 +159,8 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
     });
 
   // Get current jobs
-  const indexOfLastJob = currentPage * jobsPerPage;
-  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+  const indexOfLastJob = currentPage * pageSize;
+  const indexOfFirstJob = indexOfLastJob - pageSize;
   const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
 
   // Change page
@@ -457,26 +458,44 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
         </table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="mt-4 flex flex-col md:flex-row justify-between items-center">
-        <div className="text-[#94a3b8] text-sm mb-3 md:mb-0">
+      {/* Updated Pagination Controls */}
+      <div className="mt-6 flex items-center justify-between">
+        <div className="text-sm text-[#94a3b8]">
           Showing {jobs.length} of {totalJobs} jobs
         </div>
-        {hasMore && (
+        <div className="flex items-center space-x-4">
           <button
-            onClick={handleLoadMore}
-            disabled={loadingMore}
-            className="px-4 py-2 text-[#818cf8] hover:text-[#a5b4fc] disabled:text-[#64748b] disabled:cursor-not-allowed"
+            onClick={handlePreviousPage}
+            disabled={!hasPrevious || loading}
+            className={`px-4 py-2 rounded-lg border ${
+              hasPrevious && !loading
+                ? 'border-[#818cf8] text-[#818cf8] hover:bg-[#818cf8] hover:text-white'
+                : 'border-[#475569] text-[#475569] cursor-not-allowed'
+            }`}
           >
-            {loadingMore ? 'Loading...' : 'Load More'}
+            Previous
           </button>
-        )}
+          <span className="text-[#94a3b8">
+            Page {currentPage}
+          </span>
+          <button
+            onClick={handleNextPage}
+            disabled={!hasNext || loading}
+            className={`px-4 py-2 rounded-lg border ${
+              hasNext && !loading
+                ? 'border-[#818cf8] text-[#818cf8] hover:bg-[#818cf8] hover:text-white'
+                : 'border-[#475569] text-[#475569] cursor-not-allowed'
+            }`}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Loading indicator */}
-      {loadingMore && (
-        <div className="text-center mt-4">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#818cf8]"></div>
+      {loading && (
+        <div className="absolute inset-0 bg-[#1e293b]/50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#818cf8]"></div>
         </div>
       )}
     </div>
