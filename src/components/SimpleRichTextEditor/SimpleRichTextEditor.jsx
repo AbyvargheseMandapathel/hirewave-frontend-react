@@ -15,17 +15,8 @@ import 'highlight.js/styles/atom-one-dark.css'; // You can use any theme
 const SimpleRichTextEditor = ({ value, onChange, placeholder }) => {
   const editorRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
-  const [popup, setPopup] = useState({ isOpen: false, message: '', type: 'info' });
-  const [inputPopup, setInputPopup] = useState({
-    isOpen: false,
-    title: '',
-    type: 'text',
-    placeholder: '',
-    initialValue: '',
-    options: [],
-    onSubmit: () => {}
-  });
   const [selection, setSelection] = useState(null);
+  const selectionRef = useRef(null); // Add this ref to store selection
 
   useEffect(() => {
     if (editorRef.current) {
@@ -33,57 +24,66 @@ const SimpleRichTextEditor = ({ value, onChange, placeholder }) => {
     }
   }, [value]);
 
-  // Add selection tracking
+  // Modified selection tracking
   useEffect(() => {
     const saveSelection = () => {
       const sel = window.getSelection();
       if (sel.rangeCount > 0) {
-        setSelection(sel.getRangeAt(0));
+        const range = sel.getRangeAt(0);
+        if (editorRef.current.contains(range.commonAncestorContainer)) {
+          selectionRef.current = range;
+        }
       }
     };
 
     const editor = editorRef.current;
     editor?.addEventListener('mouseup', saveSelection);
     editor?.addEventListener('keyup', saveSelection);
+    editor?.addEventListener('input', saveSelection);
 
     return () => {
       editor?.removeEventListener('mouseup', saveSelection);
       editor?.removeEventListener('keyup', saveSelection);
+      editor?.removeEventListener('input', saveSelection);
     };
   }, []);
 
-  // Restore selection after content update
-  useEffect(() => {
-    if (selection && editorRef.current) {
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(selection);
-    }
-  }, [value]);
-
+  // Modified content change handler
   const handleContentChange = () => {
     if (editorRef.current) {
-      // Save selection before updating
-      const sel = window.getSelection();
-      if (sel.rangeCount > 0) {
-        setSelection(sel.getRangeAt(0));
+      const content = editorRef.current.innerHTML;
+      onChange(content);
+
+      // Restore selection after content update
+      if (selectionRef.current) {
+        requestAnimationFrame(() => {
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(selectionRef.current);
+        });
       }
-      
-      onChange(editorRef.current.innerHTML);
     }
   };
 
-  const showPopup = (message, type = 'info') => {
-    setPopup({ isOpen: true, message, type });
-  };
-
-  const closePopup = () => {
-    setPopup({ ...popup, isOpen: false });
-  };
-
+  // Modify execCommand to preserve selection
   const execCommand = (command, showUI = false, value = null) => {
+    // Save current selection
+    const currentSelection = selectionRef.current;
+
+    // Execute command
     document.execCommand(command, showUI, value);
+
+    // Update content
     handleContentChange();
+
+    // Restore selection
+    if (currentSelection) {
+      requestAnimationFrame(() => {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(currentSelection);
+      });
+    }
   };
 
   // Text formatting
@@ -161,7 +161,7 @@ const SimpleRichTextEditor = ({ value, onChange, placeholder }) => {
     const languages = ['python', 'javascript', 'java', 'c', 'html', 'css'];
     
     // Save current selection
-    const currentSelection = window.getSelection().getRangeAt(0);
+    const currentSelection = selectionRef.current;
     
     setInputPopup({
       isOpen: true,
@@ -173,36 +173,35 @@ const SimpleRichTextEditor = ({ value, onChange, placeholder }) => {
       onSubmit: (data) => {
         const { selectedLanguage, codeContent } = data;
         if (selectedLanguage && codeContent) {
-          // Restore selection before inserting
+          // Restore selection
           const sel = window.getSelection();
           sel.removeAllRanges();
           sel.addRange(currentSelection);
 
-          // Create code block element
+          // Create and insert code block
           const codeBlock = document.createElement('pre');
           const code = document.createElement('code');
           code.className = `language-${selectedLanguage}`;
           code.textContent = codeContent;
           codeBlock.appendChild(code);
           
-          // Insert at cursor position
           currentSelection.deleteContents();
           currentSelection.insertNode(codeBlock);
           
-          // Add line breaks
+          // Add spacing
           const br = document.createElement('br');
           codeBlock.parentNode.insertBefore(br.cloneNode(), codeBlock);
           codeBlock.parentNode.insertBefore(br.cloneNode(), codeBlock.nextSibling);
           
-          // Update content
+          // Update content and move cursor after code block
           handleContentChange();
           
-          // Move cursor after code block
           const range = document.createRange();
           range.setStartAfter(codeBlock.nextSibling);
           range.collapse(true);
           sel.removeAllRanges();
           sel.addRange(range);
+          selectionRef.current = range;
         }
       }
     });
@@ -471,11 +470,9 @@ const SimpleRichTextEditor = ({ value, onChange, placeholder }) => {
         onBlur={() => setIsFocused(false)}
         data-placeholder={placeholder}
         onKeyDown={(e) => {
-          // Preserve cursor position on Enter key
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            document.execCommand('insertLineBreak');
-            handleContentChange();
+            execCommand('insertLineBreak');
           }
         }}
       />
