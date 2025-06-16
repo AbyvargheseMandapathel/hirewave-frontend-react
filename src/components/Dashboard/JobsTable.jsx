@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { fetchJobs, updateJob } from "../../services/jobApi";
 import { toast } from "react-hot-toast";
 import {
@@ -57,21 +57,24 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
     }
   }, [isMobile]);
 
+  // Check if response data exists before accessing it
   const loadJobs = async (pageNumber) => {
     try {
       setLoadingMore(true);
-      const response = await fetchJobs(pageNumber);
+      const data = await fetchJobs(pageNumber);
       
-      if (pageNumber === 1) {
-        setJobs(response.results);
-      } else {
-        setJobs(prev => [...prev, ...response.results]);
+      if (data && data.results) {
+        if (pageNumber === 1) {
+          setJobs(data.results);
+        } else {
+          setJobs(prev => [...prev, ...data.results]);
+        }
+        setHasMore(!!data.next);
+        setTotalJobs(data.count || 0);
       }
-      
-      setHasMore(response.has_more);
-      setTotalJobs(response.total);
       setError(null);
     } catch (err) {
+      console.error('Error loading jobs:', err);
       setError('Failed to fetch jobs');
       toast.error('Error loading jobs');
     } finally {
@@ -318,20 +321,22 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
               <th className="pb-3 text-right font-medium px-4 md:px-2">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            {currentJobs.map((job) => (
-              <tr key={job.id} className="border-b border-[#334155] text-white">
-                <td className="py-4 px-4 md:px-2">
-                  <Link to={`/job/${job.id}`} className="hover:text-[#818cf8]">
-                    <div className="flex flex-col md:flex-row md:items-center">
-                      <span>{job.title}</span>
-                      <span className="text-[#94a3b8] text-sm md:hidden mt-1">{job.company}</span>
-                    </div>
+          <tbody className="bg-[#1e293b] divide-y divide-[#334155]">
+            {jobs.map((job) => (
+              <tr key={job.id} className="hover:bg-[#0f172a]">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <Link 
+                    to={`/dashboard/jobs/${job.id}`}
+                    className="text-[#818cf8] hover:text-[#a5b4fc]"
+                  >
+                    {job.title}
                   </Link>
                 </td>
-                <td className="py-4 px-2 text-[#94a3b8] hidden md:table-cell">{job.company}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-[#94a3b8] hidden md:table-cell">
+                  {job.company}
+                </td>
                 {showPostedBy && (
-                  <td className="py-4 px-2 text-center hidden md:table-cell">
+                  <td className="px-6 py-4 whitespace-nowrap text-center hidden md:table-cell">
                     <div className="flex items-center justify-center">
                       {job.postedBy === "admin" ? (
                         <span className="flex items-center text-[#94a3b8]">
@@ -346,13 +351,19 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
                     </div>
                   </td>
                 )}
-                <td className="py-4 px-2 text-center hidden md:table-cell">{job.views}</td>
-                <td className="py-4 px-2 text-center hidden md:table-cell">{job.interested}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-center hidden md:table-cell">
+                  {job.views}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-center hidden md:table-cell">
+                  {job.interested}
+                </td>
                 {showApplicants && (
-                  <td className="py-4 px-2 text-center hidden md:table-cell">{job.applicants}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center hidden md:table-cell">
+                    {job.applicants}
+                  </td>
                 )}
                 {showStatus && (
-                  <td className="py-4 px-2 text-center">
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${
                         job.postedBy === "admin"
@@ -368,8 +379,10 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
                     </span>
                   </td>
                 )}
-                <td className="py-4 px-2 text-center text-[#94a3b8] hidden md:table-cell">{job.date}</td>
-                <td className="py-4 px-4 md:px-2 text-right">
+                <td className="px-6 py-4 whitespace-nowrap text-center text-[#94a3b8] hidden md:table-cell">
+                  {job.date}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
                   <div className="flex items-center justify-end relative">
                     {job.externalLink && (
                       <a

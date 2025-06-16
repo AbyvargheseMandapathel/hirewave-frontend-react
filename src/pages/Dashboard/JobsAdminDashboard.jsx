@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/Dashboard/DashboardLayout';
 import DashboardStats from '../../components/Dashboard/DashboardStats';
 import JobsTable from '../../components/Dashboard/JobsTable';
@@ -173,6 +174,13 @@ const JobsAdminDashboard = () => {
           >
             <FaUserTie className="mr-2" /> Recruiter Posted
           </button>
+        </div>
+
+        {/* Add New Job Button */}
+        <div className="mb-6">
+          <Link to="/dashboard/jobs/add" className="inline-block px-4 py-2 bg-[#4caf50] text-white rounded-md shadow-md hover:bg-[#45a049] transition-all">
+            Add New Job
+          </Link>
         </div>
 
         {/* Jobs Table and Activity Log */}
