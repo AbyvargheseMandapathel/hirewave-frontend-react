@@ -1,20 +1,63 @@
 import axios from 'axios';
-import { getToken } from '../utils/tokenUtils';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
+const API_URL = 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
 
-// Configure axios with authentication
+// Add auth config helper
 const getAuthConfig = () => {
-  const token = getToken();
+  const token = localStorage.getItem('accessToken');
   return {
     headers: {
-      'Authorization': token ? `Bearer ${token}` : '',
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     }
   };
 };
 
-// Category endpoints
+// Create axios instance with defaults
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// Add request interceptor for auth
+api.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    console.log('🚀 Making request to:', config.url);
+    return config;
+  },
+  error => {
+    console.error('❌ Request error:', error);
+    return Promise.reject(error);
+  }
+);
+
+export const fetchBlogPosts = async () => {
+  console.log('📫 Fetching blog posts...');
+  try {
+    const response = await api.get('/blog/posts/', getAuthConfig());
+    console.log('📨 Blog posts received:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('📭 Failed to fetch blog posts:', error);
+    throw error;
+  }
+};
+
+export const deleteBlogPost = async (postId) => {
+  try {
+    await api.delete(`/blog/posts/${postId}/`, getAuthConfig());
+  } catch (error) {
+    console.error(`Error deleting blog post ${postId}:`, error);
+    throw error;
+  }
+};
+
 export const fetchCategoriesApi = async () => {
   try {
     const response = await axios.get(`${API_URL}/blog/categories/`, getAuthConfig());
@@ -39,66 +82,23 @@ export const createCategory = async (categoryData) => {
   }
 };
 
-// Blog post endpoints
-export const fetchBlogPosts = async (filters = {}) => {
+export const getCategories = async () => {
   try {
-    const response = await axios.get(`${API_URL}/blog/`, {
-      ...getAuthConfig(),
-      params: filters
-    });
+    const response = await api.get('/blog/categories/', getAuthConfig());
+    console.log('📋 Categories fetched:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error fetching blog posts:', error);
+    console.error('❌ Failed to fetch categories:', error);
     throw error;
   }
 };
 
-export const fetchBlogPostBySlug = async (slug) => {
+export const deleteCategory = async (categoryId) => {
   try {
-    const response = await axios.get(`${API_URL}/blog/${slug}/`, getAuthConfig());
-    return response.data;
+    await api.delete(`/blog/categories/${categoryId}/`, getAuthConfig());
+    console.log('🗑️ Category deleted:', categoryId);
   } catch (error) {
-    console.error(`Error fetching blog post with slug ${slug}:`, error);
-    throw error;
-  }
-};
-
-export const createBlogPost = async (postData) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/blog/`, 
-      postData,
-      {
-        ...getAuthConfig(),
-        headers: {
-          'Authorization': `Bearer ${getToken()}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error creating blog post:', error);
-    throw error;
-  }
-};
-
-export const updateBlogPost = async (postId, postData) => {
-  try {
-    const response = await axios.put(
-      `${API_URL}/blog/${postId}/`, 
-      postData,
-      {
-        ...getAuthConfig(),
-        headers: {
-          'Authorization': `Bearer ${getToken()}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(`Error updating blog post ${postId}:`, error);
+    console.error(`❌ Failed to delete category ${categoryId}:`, error);
     throw error;
   }
 };

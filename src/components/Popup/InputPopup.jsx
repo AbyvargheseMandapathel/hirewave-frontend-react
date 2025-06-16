@@ -9,19 +9,31 @@ const InputPopup = ({
   title = 'Enter value', 
   placeholder = '',
   initialValue = '',
-  type = 'text'
+  type = 'text',
+  options = [],
+  preventFormSubmit = true // Add this prop
 }) => {
   const [value, setValue] = useState(initialValue);
+  const [selectedLanguage, setSelectedLanguage] = useState(options[0] || '');
+  const [codeContent, setCodeContent] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setValue(initialValue);
+      setCodeContent('');
+      if (options.length > 0) {
+        setSelectedLanguage(options[0]);
+      }
     }
-  }, [isOpen, initialValue]);
+  }, [isOpen, initialValue, options]);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(value);
+    e.preventDefault(); // Always prevent form submission
+    if (type === 'custom') {
+      onSubmit({ selectedLanguage, codeContent });
+    } else {
+      onSubmit(value);
+    }
     onClose();
   };
 
@@ -42,25 +54,51 @@ const InputPopup = ({
           </div>
           
           <form onSubmit={handleSubmit}>
-            <input
-              type={type}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              className="w-full bg-[#0f172a] text-white px-4 py-2 rounded-lg border border-[#334155] focus:outline-none focus:ring-2 focus:ring-[#818cf8] focus:border-transparent mb-4"
-              placeholder={placeholder}
-              autoFocus
-            />
+            {type === 'custom' ? (
+              <>
+                <label className="block mb-2 text-sm font-medium text-gray-300">Language</label>
+                <select
+                  className="w-full p-2 mb-4 bg-[#0f172a] text-white rounded-lg border border-[#334155]"
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                >
+                  {options.map((lang) => (
+                    <option key={lang} value={lang}>
+                      {lang.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+
+                <textarea
+                  rows="6"
+                  className="w-full bg-[#0f172a] text-white px-4 py-2 rounded-lg border border-[#334155] focus:outline-none focus:ring-2 focus:ring-[#818cf8] focus:border-transparent mb-4"
+                  placeholder={placeholder}
+                  defaultValue={initialValue}
+                  onChange={(e) => setCodeContent(e.target.value)}
+                />
+              </>
+            ) : (
+              <input
+                type={type}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="w-full bg-[#0f172a] text-white px-4 py-2 rounded-lg border border-[#334155] focus:outline-none focus:ring-2 focus:ring-[#818cf8] focus:border-transparent mb-4"
+                placeholder={placeholder}
+                autoFocus
+              />
+            )}
             
             <div className="flex justify-end space-x-2">
               <button
-                type="button"
+                type="button" // Explicitly set type
                 onClick={onClose}
                 className="px-4 py-2 rounded-lg bg-[#334155] text-white hover:bg-[#475569]"
               >
                 Cancel
               </button>
               <button
-                type="submit"
+                type="button" // Change to type="button"
+                onClick={handleSubmit} // Use onClick instead of form submit
                 className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#818cf8] to-[#a5b4fc] text-white hover:from-[#a5b4fc] hover:to-[#818cf8]"
               >
                 Submit

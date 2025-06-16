@@ -95,8 +95,7 @@
   }
   
   .editor-content p {
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin: 1rem 0;
   }
   
   /* Image resize handle */
@@ -122,4 +121,18 @@
   
   .editor-content [style*="text-align: justify"] {
     text-align: justify;
+  }
+  
+  .editor-content pre {
+    background: #1e293b;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+  
+  .editor-content pre code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+    line-height: 1.5;
   }
