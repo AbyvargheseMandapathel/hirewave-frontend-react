@@ -84,7 +84,7 @@ const BlogPostsTable = () => {
   };
 
   const handleView = (post) => {
-    navigate(`/dashboard/blog/view/${post.slug}`, { state: { post } });
+    navigate(`/blog/${post.slug}`, { state: { post } });
   };
 
   // Add this function before the return statement
