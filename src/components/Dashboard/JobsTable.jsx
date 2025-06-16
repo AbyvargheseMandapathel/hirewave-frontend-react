@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { fetchJobs, updateJob, deleteJob } from "../../services/jobApi";
+import { fetchJobs,fetchDashboardJobs, updateJob, deleteJob } from "../../services/jobApi";
 import { toast } from "react-hot-toast";
 import {
   FaEllipsisV,
@@ -63,7 +63,7 @@ const JobsTable = ({ showPostedBy = false, showApplicants = true, showStatus = t
   const loadJobs = async (pageNumber) => {
     try {
       setLoading(true);
-      const data = await fetchJobs(pageNumber, pageSize);
+      const data = await fetchDashboardJobs(pageNumber, pageSize);
       
       setJobs(data.results);
       setTotalJobs(data.count);

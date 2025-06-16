@@ -22,7 +22,7 @@ const JobsAdminDashboard = () => {
         
         
         const response = await fetch(
-          'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/jobs/?page=1&limit=6'
+          'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/jobs/?page=1&limit=1000'
         );
         if (!response.ok) throw new Error('Failed to fetch jobs');
 

@@ -32,6 +32,26 @@ export const fetchJobs = async (page = 1, limit = 6) => {
   }
 };
 
+export const fetchDashboardJobs = async (page = 1, limit = 1000) => {
+  try {
+    console.log(`Fetching jobs for page ${page}`);
+    const response = await axios.get(
+      `${API_URL}/jobs/?page=${page}&limit=${limit}`, 
+      getAuthConfig()
+    );
+    return {
+      results: response.data.results,
+      count: response.data.count,
+      next: response.data.next,
+      previous: response.data.previous,
+      currentPage: page
+    };
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    throw error;
+  }
+};
+
 export const updateJob = async (jobId, jobData) => {
   try {
     const response = await axios.put(`${API_URL}/jobs/${jobId}/`, jobData, getAuthConfig());
