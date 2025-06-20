@@ -47,13 +47,13 @@ const JobCard = ({ job }) => {
       </Link>
       
       {/* Share & Earn Button */}
-      <div className="px-6 pb-6">
+      <div class="px-6 pb-6">
         <button
           onClick={handleShareAndEarn}
-          className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-medium py-3 px-4 rounded-lg hover:from-blue-600 hover:to-cyan-500 transition-all duration-300 flex items-center justify-center space-x-2"
+          class="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-medium py-2 px-4 rounded-lg hover:from-blue-600 hover:to-cyan-500 transition-all duration-300 flex items-center justify-between"
         >
           <span>Click here to Share & Earn</span>
-          <FaDollarSign className="text-green-300" />
+          <i class="fas fa-rupee-sign text-green-300"></i>
         </button>
       </div>
     </div>
