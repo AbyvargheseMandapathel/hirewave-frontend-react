@@ -1,17 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaBriefcase, FaClock, FaDollarSign } from 'react-icons/fa';
+import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaBriefcase, FaDollarSign } from 'react-icons/fa';
 
 const JobCard = ({ job }) => {
   const handleShareAndEarn = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // Add your share and earn logic here
     console.log('Share and earn clicked for job:', job.id);
   };
 
   return (
-    <div className="bg-[#1e293b] rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+    <div className="bg-[#1e293b] rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col">
       <Link 
         to={`/job/${job.id}`}
         className="block p-6 hover:transform hover:scale-105 transition-all duration-300"
@@ -39,21 +38,17 @@ const JobCard = ({ job }) => {
             <FaBriefcase className="mr-2" />
             {job.type}
           </div>
-          {/* <div className="flex items-center text-[#94a3b8]">
-            <FaClock className="mr-2" />
-            {job.posted_date}
-          </div> */}
         </div>
       </Link>
       
       {/* Share & Earn Button */}
-      <div class="px-6 pb-6">
+      <div className="px-6 pb-6 mt-auto">
         <button
           onClick={handleShareAndEarn}
-          class="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-medium py-2 px-4 rounded-lg hover:from-blue-600 hover:to-cyan-500 transition-all duration-300 flex items-center justify-between"
+          className="w-full bg-gradient-to-r from-blue-500 to-teal-400 text-white font-semibold py-2 px-4 rounded-lg hover:from-blue-600 hover:to-teal-500 transition-all duration-300 flex items-center justify-between group"
         >
-          <span>Click here to Share & Earn</span>
-          <i class="fas fa-rupee-sign text-green-300"></i>
+          <span className="text-left">Boost Earnings by Sharing</span>
+          <FaDollarSign className="text-green-300 group-hover:scale-110 transition-transform duration-200" />
         </button>
       </div>
     </div>
