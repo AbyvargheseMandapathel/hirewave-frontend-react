@@ -85,7 +85,6 @@ function App() {
             <Route path="/login" element={<Layout><Login /></Layout>} />
             <Route path="/signup" element={<Layout><Signup /></Layout>} />
             <Route path="/recruiter-signup" element={<Layout><RecruiterSignup /></Layout>} />
-            <Route path="/refer-and-win" element={<Layout><ReferAndWin /></Layout>} />
             <Route path="/feedback" element={<Layout><Feedback /></Layout>} />
             <Route path="/contact-us" element={<Layout><ContactUs /></Layout>} />
             <Route path="/about-us" element={<Layout><AboutUs /></Layout>} />
@@ -256,6 +255,15 @@ function App() {
               element={
                 <ProtectedRoute allowedUserTypes={['jobseeker']}>
                   <JobseekerSavedJobs />
+                </ProtectedRoute>
+              } 
+            />
+
+<Route 
+              path="/refer-and-win" 
+              element={
+                <ProtectedRoute allowedUserTypes={['jobseeker']}>
+                  <Layout><ReferAndWin /></Layout>
                 </ProtectedRoute>
               } 
             />

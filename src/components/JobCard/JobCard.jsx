@@ -6,6 +6,7 @@ const JobCard = ({ job }) => {
   const handleShareAndEarn = (e) => {
     e.preventDefault();
     e.stopPropagation();
+  
     console.log('Share and earn clicked for job:', job.id);
   };
 
