@@ -3,6 +3,8 @@ import { Link,useNavigate } from 'react-router-dom';
 import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaBriefcase, FaDollarSign } from 'react-icons/fa';
 
 const JobCard = ({ job }) => {
+  const navigate = useNavigate();
+
   const handleShareAndEarn = (e) => {
     e.preventDefault();
     e.stopPropagation();
