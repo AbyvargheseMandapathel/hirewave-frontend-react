@@ -28,7 +28,7 @@ const BlogDetail = () => {
   // Define the incrementViewCount function
   const incrementViewCount = async () => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.hirewave.online/api';
       await axios.post(`${API_URL}/blog/posts/${postSlug}/increment_view/`, {}, {
         headers: getAuthHeader()
       });
@@ -46,7 +46,7 @@ const BlogDetail = () => {
         setLoading(true);
         setError(null);
         
-        const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
+        const API_URL = import.meta.env.VITE_API_URL || 'https://api.hirewave.online/api';
         const response = await axios.get(`${API_URL}/blog/posts/${postSlug}/`, {
           headers: getAuthHeader()
         });

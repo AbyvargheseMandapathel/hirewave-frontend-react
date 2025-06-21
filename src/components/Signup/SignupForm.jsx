@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaCalendar, FaGraduationCap, FaUserGraduate, FaUserFriends } from 'react-icons/fa';
 import InputField from '../common/InputField';
 import Button from '../common/Button';
@@ -7,6 +7,15 @@ import { registerUser } from '../../services/authService';
 
 const SignupForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get referral code from URL query params
+  const getReferralFromURL = () => {
+    const params = new URLSearchParams(location.search);
+    return params.get('ref') || 'NEW';
+  };
+
+  // Set initial form data with referral code from URL
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,13 +26,23 @@ const SignupForm = () => {
     college: '',
     yearOfPassing: '',
     status: '',
-    referralCode: 'NEW' // Default referral code
+    referralCode: getReferralFromURL() // <-- set from URL or 'NEW'
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // If the user navigates to a new URL with a different ref, update the referralCode
+  useEffect(() => {
+    const ref = getReferralFromURL();
+    setFormData(prev => ({
+      ...prev,
+      referralCode: ref
+    }));
+    // eslint-disable-next-line
+  }, [location.search]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

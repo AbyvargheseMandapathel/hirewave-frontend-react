@@ -5,7 +5,7 @@ import {
   FaBell, FaSearch, FaUserCircle, FaBars, FaTimes, 
   FaMoneyBillWave, FaSignOutAlt, FaRss 
 } from 'react-icons/fa';
-import { MdDashboardCustomize } from "react-icons/md";
+import { MdDashboardCustomize, MdPersonAddAlt1 } from "react-icons/md";
 
 import { getCurrentUser, logout } from '../../services/authService';
 
@@ -78,6 +78,7 @@ const DashboardLayout = ({ children }) => {
         { to: '/dashboard/admin/analytics', icon: <FaChartBar />, text: 'Analytics' },
         { to: '/dashboard/admin/blog', icon: <FaRss />, text: 'Blog' },
         { to: '/dashboard/admin/payments', icon: <FaMoneyBillWave />, text: 'Payments' },
+        { to: '/refer-and-win', icon: <MdPersonAddAlt1 />, text: 'Refer and Win' },
         ...commonLinks
       ];
     } else if (userType === 'recruiter') {
@@ -87,6 +88,7 @@ const DashboardLayout = ({ children }) => {
         { to: '/dashboard/recruiter/jobs', icon: <FaBriefcase />, text: 'My Jobs' },
         { to: '/dashboard/recruiter/applications', icon: <FaUsers />, text: 'Applications' },
         { to: '/dashboard/recruiter/analytics', icon: <FaChartBar />, text: 'Analytics' },
+        { to: '/refer-and-win', icon: <MdPersonAddAlt1 />, text: 'Refer and Win' },
         ...commonLinks
       ];
     } else if (userType === 'jobseeker') {
@@ -94,6 +96,7 @@ const DashboardLayout = ({ children }) => {
         { to: '/', icon: <FaHome />, text: 'Home' },
         { to: '/dashboard/jobseeker', icon: <MdDashboardCustomize />, text: 'Dashboard' },
         { to: '/dashboard/jobseeker/applications', icon: <FaBriefcase />, text: 'My Applications' },
+        { to: '/refer-and-win', icon: <MdPersonAddAlt1 />, text: 'Refer and Win' },
         { to: '/dashboard/jobseeker/saved-jobs', icon: <FaUsers />, text: 'Saved Jobs' },
         { to: '/dashboard/jobseeker/profile', icon: <FaUserCircle />, text: 'My Profile' },
         ...commonLinks

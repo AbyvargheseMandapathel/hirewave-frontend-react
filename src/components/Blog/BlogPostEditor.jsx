@@ -191,7 +191,7 @@ const BlogPostEditor = ({ post, onSave, onCancel }) => {
 
       console.log('Form payload:', Object.fromEntries(formPayload.entries()));
 
-      const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.hirewave.online/api';
       const url = post 
         ? `${API_URL}/blog/posts/${post.slug}/`
         : `${API_URL}/blog/posts/`;

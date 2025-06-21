@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
+const API_URL = 'https://api.hirewave.online/api';
 
 const getAuthConfig = () => {
   const token = localStorage.getItem('accessToken');

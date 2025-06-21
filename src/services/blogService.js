@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getAuthHeader } from './authService';
 
 // Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.hirewave.online/api';
 const DEFAULT_TIMEOUT = 10000;
 
 // Axios instance

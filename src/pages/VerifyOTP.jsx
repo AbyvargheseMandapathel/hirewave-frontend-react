@@ -179,7 +179,7 @@ const VerifyOTP = () => {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">Verify Your Email</h1>
             <p className="text-[#94a3b8]">
-              {message || `We've sent a verification code to ${email}`}
+              {message || `We've sent a verification code to ${email}. Please check your spam/junk folder in case it was delivered there.`}
             </p>
           </div>
           

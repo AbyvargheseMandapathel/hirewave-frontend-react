@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaBriefcase, FaDollarSign } from 'react-icons/fa';
 
 const JobCard = ({ job }) => {
@@ -7,7 +7,7 @@ const JobCard = ({ job }) => {
     e.preventDefault();
     e.stopPropagation();
   
-    console.log('Share and earn clicked for job:', job.id);
+    navigate('/refer-and-win');
   };
 
   return (

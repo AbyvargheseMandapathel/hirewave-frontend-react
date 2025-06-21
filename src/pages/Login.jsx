@@ -196,7 +196,7 @@ const Login = () => {
               </h1>
               <p className="text-[#94a3b8]">
                 {showOtpForm 
-                  ? `We've sent a verification code to ${email}`
+                  ? `We've sent a verification code to ${email}. Please check your spam/junk folder in case it was delivered there.` 
                   : "Login to access your account"
                 }
               </p>

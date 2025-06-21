@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use environment variable for API URL with fallback
-const API_URL = import.meta.env.VITE_AUTH_API_URL || 'https://hirewavebackend-edxfrq215-q1lgmfjl.leapcell.dev/api/auth/';
+const API_URL = import.meta.env.VITE_AUTH_API_URL || 'https://api.hirewave.online/api/auth/';
 
 /**
  * Helper function to clear all auth storage
